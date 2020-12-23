@@ -7,7 +7,7 @@
     <Header/>
     <div class="container">
         <div class="cardDioses">
-            <img src="/img/tarjetas/PlutonCard.svg" alt="" width="100%">
+            <img src="/img/tarjetas/PlutonCard.webp" alt="" width="100%">
         </div>
             <div class="row">
                 <div class="col s12 TitularDioses">

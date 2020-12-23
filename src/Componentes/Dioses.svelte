@@ -95,6 +95,36 @@
               </div>
             </div>
 
+            <div id="Minerva" class="card transparent">
+              <div class="card-image dios_img">
+                <img src="../img/Minerva.png">
+              </div>
+              <div class="card-content">
+                <span class="card-title dioses_tit center">MINERVA</span>
+                <p>En la mitología romana, Minerva es la diosa de la sabiduría y las artes, además de la protectora de Roma y la patrona de los artesanos.</p>
+              </div>
+            </div>
+
+            <div id="Diana" class="card transparent">
+              <div class="card-image dios_img">
+                <img src="../img/Diana.png">
+              </div>
+              <div class="card-content">
+                <span class="card-title dioses_tit center">DIANA</span>
+                <p>En la mitología romana, Diana era la diosa virgen de la caza, protectora de la naturaleza y la Luna. Su diosa griega equivalente en la literatura es Artemisa, si bien en cuanto a culto era de origen itálico.</p>
+              </div>
+            </div>
+
+            <div id="Baco" class="card transparent">
+              <div class="card-image dios_img">
+                <img src="../img/Baco.png">
+              </div>
+              <div class="card-content">
+                <span class="card-title dioses_tit center">BACO</span>
+                <p>Baco en Roma o su equivalente Dionisio en Grecia es conocido como el dios romano del vino, del éxtasis y desenfreno.</p>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>  

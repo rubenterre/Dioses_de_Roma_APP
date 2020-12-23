@@ -10,6 +10,9 @@ import NeptunoPerfil from './Paginas/NeptunoPerfil.svelte'
 import PlutonPerfil from './Paginas/PlutonPerfil.svelte'
 import VenusPerfil from './Paginas/VenusPerfil.svelte'
 import VulcanoPerfil from './Paginas/VulcanoPerfil.svelte'
+import MinervaPerfil from './Paginas/MinervaPerfil.svelte'
+import DianaPerfil from './Paginas/DianaPerfil.svelte'
+import BacoPerfil from './Paginas/BacoPerfil.svelte'
 
 import NotFound from './Paginas/NotFound.svelte'
 
@@ -26,6 +29,9 @@ const routes = {
     '/PlutonPerfil': PlutonPerfil,
     '/VenusPerfil': VenusPerfil,
     '/VulcanoPerfil': VulcanoPerfil,
+    '/MinervaPerfil': MinervaPerfil,
+    '/DianaPerfil': DianaPerfil,
+    '/BacoPerfil': BacoPerfil,
 
     // Catch-all route last
     '*': NotFound

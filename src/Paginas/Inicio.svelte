@@ -8,7 +8,10 @@
 	import Vulcano from '../Componentes/Vulcano.svelte';
 	import Hades from '../Componentes/Pluton.svelte';
 	import Mercurio from '../Componentes/Mercurio.svelte';
-    import Header from '../Componentes/Header.svelte';
+	import Header from '../Componentes/Header.svelte';
+	import Minerva from '../Componentes/Minerva.svelte';
+	import Diana from '../Componentes/Diana.svelte';
+	import Baco from '../Componentes/Baco.svelte';
 
 	import {
     link
@@ -34,6 +37,9 @@
 	let vulcano = false;
 	let hades = false;
 	let mercurio = false;
+	let minerva = false;
+	let diana = false;
+	let baco = false;
 
 	$: if (jupiter) {
 		jupiter = true;
@@ -45,6 +51,9 @@
 		vulcano = false;
 		hades = false;
 		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
 
 	$: if (juno) {
@@ -57,6 +66,9 @@
 		vulcano = false;
 		hades = false;
 		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
 
 	$: if (neptuno) {
@@ -69,6 +81,9 @@
 		vulcano = false;
 		hades = false;
 		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
 
 	$: if (venus) {
@@ -81,6 +96,9 @@
 		vulcano = false;
 		hades = false;
 		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
 
 	$: if (marte) {
@@ -93,6 +111,9 @@
 		vulcano = false;
 		hades = false;
 		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
 
 	$: if (apolo) {
@@ -105,6 +126,9 @@
 		vulcano = false;
 		hades = false;
 		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
 
 	$: if (vulcano) {
@@ -117,6 +141,9 @@
 		vulcano = true;
 		hades = false;
 		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
 
 	$: if (mercurio) {
@@ -129,6 +156,9 @@
 		vulcano = false;
 		hades = false;
 		mercurio = true;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
 
 	$: if (hades) {
@@ -141,7 +171,57 @@
 		vulcano = false;
 		hades = true;
 		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = false;
 	}
+
+	$: if (minerva) {
+		jupiter = false;
+		juno = false;
+		neptuno = false;
+		venus = false;
+		marte = false;
+		apolo = false;
+		vulcano = false;
+		hades = false;
+		mercurio = false;
+		minerva = true;
+		diana = false;
+		baco = false;
+	}
+
+	$: if (diana) {
+		jupiter = false;
+		juno = false;
+		neptuno = false;
+		venus = false;
+		marte = false;
+		apolo = false;
+		vulcano = false;
+		hades = false;
+		mercurio = false;
+		minerva = false;
+		diana = true;
+		baco = false;
+	}
+
+	$: if (baco) {
+		jupiter = false;
+		juno = false;
+		neptuno = false;
+		venus = false;
+		marte = false;
+		apolo = false;
+		vulcano = false;
+		hades = false;
+		mercurio = false;
+		minerva = false;
+		diana = false;
+		baco = true;
+	}
+
+
 </script>
 
 <Header/>
@@ -149,46 +229,61 @@
 <nav class="botones_dioses">
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Jupiter_boton" class="btn-dios transparent" on:click={()=> jupiter = true}
-			><img src="../img/dioses romanos_btn/Jupiter_btn.svg" alt=""></button>
+			><img src="../img/dioses romanos_btn/Jupiter_btn.webp" alt=""></button>
 	</div>
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Juno_boton" class="btn-dios transparent" on:click={()=> juno = true} ><img
-				src="../img/dioses romanos_btn/Juno_btn.svg" alt=""></button>
-
-	</div>
-	<div class="btn_dioses">
-		<button href="javascript:void(0)" id="Neptuno_boton" class="btn-dios transparent" on:click={()=> neptuno = true}
-			><img src="../img/dioses romanos_btn/Neptuno_btn.svg" alt=""></button>
+				src="../img/dioses romanos_btn/Juno_btn.webp" alt=""></button>
 
 	</div>
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Venus_boton" class="btn-dios transparent" on:click={()=> venus = true}
-			><img src="../img/dioses romanos_btn/Venus_btn.svg" alt=""></button>
+			><img src="../img/dioses romanos_btn/Venus_btn.webp" alt=""></button>
 
 	</div>
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Apolo_boton" class="btn-dios transparent" on:click={()=> apolo = true}
-			><img src="../img/dioses romanos_btn/Apolo_btn.svg" alt=""></button>
+			><img src="../img/dioses romanos_btn/Apolo_btn.webp" alt=""></button>
 
 	</div>
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Vulcano_boton" class="btn-dios transparent" on:click={()=> vulcano = true}
-			><img src="../img/dioses romanos_btn/Vulcano_btn.svg" alt=""></button>
+			><img src="../img/dioses romanos_btn/Vulcano_btn.webp" alt=""></button>
 
 	</div>
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Marte_boton" class="btn-dios transparent" on:click={()=> marte = true}
-			><img src="../img/dioses romanos_btn/Marte_btn.svg" alt=""></button>
+			><img src="../img/dioses romanos_btn/Marte_btn.webp" alt=""></button>
 
 	</div>
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Mercurio_boton" class="btn-dios transparent" on:click={()=> mercurio =
-			true} ><img src="../img/dioses romanos_btn/Mercurio_btn.svg" alt=""></button>
+			true} ><img src="../img/dioses romanos_btn/Mercurio_btn.webp" alt=""></button>
 
 	</div>
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Hades_boton" class="btn-dios transparent" on:click={()=> hades = true}
-			><img src="../img/dioses romanos_btn/Hades_btn.svg" alt=""></button>
+			><img src="../img/dioses romanos_btn/Hades_btn.webp" alt=""></button>
+
+	</div>
+	<div class="btn_dioses">
+		<button href="javascript:void(0)" id="Minerva_boton" class="btn-dios transparent" on:click={()=> minerva = true}
+			><img src="../img/dioses romanos_btn/Minerva_btn.webp" alt=""></button>
+
+	</div>
+	<div class="btn_dioses">
+		<button href="javascript:void(0)" id="Diana_boton" class="btn-dios transparent" on:click={()=> diana = true}
+			><img src="../img/dioses romanos_btn/Diana_btn.webp" alt=""></button>
+
+	</div>
+	<div class="btn_dioses">
+		<button href="javascript:void(0)" id="Baco_boton" class="btn-dios transparent" on:click={()=> baco = true}
+			><img src="../img/dioses romanos_btn/Baco_btn.webp" alt=""></button>
+
+	</div>
+	<div class="btn_dioses">
+		<button href="javascript:void(0)" id="Neptuno_boton" class="btn-dios transparent" on:click={()=> neptuno = true}
+			><img src="../img/dioses romanos_btn/Neptuno_btn.webp" alt=""></button>
 
 	</div>
 </nav>
@@ -296,6 +391,39 @@
 					</button>
 				  </div>
 						</div>
+						{:else if minerva}
+						<div class="dioses_card" transition:blur="{{amount: 10}}">
+							<div class="row" style="margin-bottom: 0px!important;">
+								<div class="col s12">
+						<Minerva/>
+					</div>
+					<button>
+						<a href="/MinervaPerfil" use:link ><h4 class="txt_sabermas">SABER MÁS</h4></a>
+					</button>
+				  </div>
+						</div>
+						{:else if diana}
+						<div class="dioses_card" transition:blur="{{amount: 10}}">
+							<div class="row" style="margin-bottom: 0px!important;">
+								<div class="col s12">
+						<Diana/>
+					</div>
+					<button>
+						<a href="/DianaPerfil" use:link ><h4 class="txt_sabermas">SABER MÁS</h4></a>
+					</button>
+				  </div>
+						</div>
+						{:else if baco}
+						<div class="dioses_card" transition:blur="{{amount: 10}}">
+							<div class="row" style="margin-bottom: 0px!important;">
+								<div class="col s12">
+						<Baco/>
+					</div>
+					<button>
+						<a href="/BacoPerfil" use:link ><h4 class="txt_sabermas">SABER MÁS</h4></a>
+					</button>
+				  </div>
+						</div>
 						{:else}
 						<div class="dioses_card" transition:blur="{{amount: 10}}">
 							<div class="row" style="margin-bottom: 0px!important;">
@@ -349,7 +477,11 @@
 }
 
 .btn-dios {
-    border: 0px;
+	border: 0px;
+}
+
+.btn-dios img{
+	width: 90px;
 }
 
       /* Dioses */

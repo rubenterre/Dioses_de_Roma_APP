@@ -5,7 +5,7 @@
 <Header />
 <div class="container">
     <div class="cardDioses">
-        <img src="/img/tarjetas/VulcanoCard.svg" alt="" width="100%">
+        <img src="/img/tarjetas/VulcanoCard.webp" alt="" width="100%">
     </div>
     <div class="row">
         <div class="col s12 TitularDioses">
