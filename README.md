@@ -1,105 +1,26 @@
-*Looking for a shareable component template? Go here --> [sveltejs/component-template](https://github.com/sveltejs/component-template)*
+Política de privacidad
 
----
+Dioses de Roma ("Dioses", "nosotros") es comprometida con la protección de su privacidad.
 
-# svelte app
-
-This is a project template for [Svelte](https://svelte.dev) apps. It lives at https://github.com/sveltejs/template.
-
-To create a new project based on this template using [degit](https://github.com/Rich-Harris/degit):
-
-```bash
-npx degit sveltejs/template svelte-app
-cd svelte-app
-```
-
-*Note that you will need to have [Node.js](https://nodejs.org) installed.*
+Nosotros creamos esta Política de Privacidad para mostrar nuestro compromiso de proteger su privacidad mientras usted utiliza cualquiera de nuestros productos y cualquier servicio disponibles a través o conectados a nuestras Apps, como nuestro sitio web (los "Servicios de Suscripción"). Su uso de Apps y Servicios de Suscripción está cubierto por esta Política de Privacidad y Términos de Uso.
 
 
-## Get started
+1. QUÉ ES POLÍTICA CONTEMPLA
 
-Install the dependencies...
+Esta Política de Privacidad se aplica sólo a las Apps y a los Servicios de Suscripción, y no se aplica a ninguna otra aplicación o servicio de suscripción que se pueda acceder a través de las Apps, incluyendo pero no limitado a las aplicaciones y servicios de suscripción a los que se accede a través de anuncios o conectados a servicios terceros, cada uno de los cuales pueden utilizar colecta de datos, almacenamiento y/o prácticas y políticas que difieren considerablemente de esta Política de Privacidad.
 
-```bash
-cd svelte-app
-npm install
-```
+Usted será responsable de garantizar la exactitud de los Datos Personales que usted presenta ante Movile. La información incorrecta afectará el uso de las Apps y Servicios de Suscripción, así como nuestra capacidad de ponerse en contacto con los métodos de contacto descritos en esta Política de Privacidad.
 
-...then start [Rollup](https://rollupjs.org):
-
-```bash
-npm run dev
-```
-
-Navigate to [localhost:5000](http://localhost:5000). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
-
-By default, the server will only respond to requests from localhost. To allow connections from other computers, edit the `sirv` commands in package.json to include the option `--host 0.0.0.0`.
-
-If you're using [Visual Studio Code](https://code.visualstudio.com/) we recommend installing the official extension [Svelte for VS Code](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode). If you are using other editors you may need to install a plugin in order to get syntax highlighting and intellisense.
-
-## Building and running in production mode
-
-To create an optimised version of the app:
-
-```bash
-npm run build
-```
-
-You can run the newly built app with `npm run start`. This uses [sirv](https://github.com/lukeed/sirv), which is included in your package.json's `dependencies` so that the app will work when you deploy to platforms like [Heroku](https://heroku.com).
+Si usted está accediendo al Servicio desde la Unión Europea (UE) o es un ciudadano europeo, por favor revise las secciones Bases Legales para Procesar Informaciones Personales y Derechos Individuales abajo para obtener más información sobre cómo procesarán sus Datos Personales y sobre los derechos que usted tiene sobre este procesamiento.
 
 
-## Single-page app mode
+2. SEGURIDAD
 
-By default, sirv will only respond to requests that match files in `public`. This is to maximise compatibility with static fileservers, allowing you to deploy your app anywhere.
+No almacenamos ningún tipo de información personal por lo que la seguridad de nuestra aplicación es completa.
 
-If you're building a single-page app (SPA) with multiple routes, sirv needs to be able to respond to requests for *any* path. You can make it so by editing the `"start"` command in package.json:
 
-```js
-"start": "sirv public --single"
-```
+3. CONTACTO
 
-## Using TypeScript
+Si usted tiene alguna pregunta o duda, por favor entre contacto a través del:
 
-This template comes with a script to set up a TypeScript development environment, you can run it immediately after cloning the template with:
-
-```bash
-node scripts/setupTypeScript.js
-```
-
-Or remove the script via:
-
-```bash
-rm scripts/setupTypeScript.js
-```
-
-## Deploying to the web
-
-### With [Vercel](https://vercel.com)
-
-Install `vercel` if you haven't already:
-
-```bash
-npm install -g vercel
-```
-
-Then, from within your project folder:
-
-```bash
-cd public
-vercel deploy --name my-project
-```
-
-### With [surge](https://surge.sh/)
-
-Install `surge` if you haven't already:
-
-```bash
-npm install -g surge
-```
-
-Then, from within your project folder:
-
-```bash
-npm run build
-surge public my-project.surge.sh
-```
+Correo electrónico:  info@rubenterre.com
