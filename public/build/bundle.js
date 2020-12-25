@@ -17131,7 +17131,7 @@ var app = (function () {
     			create_component(tab.$$.fragment);
     			attr_dev(a, "href", a_href_value = /*tab*/ ctx[3].url);
     			attr_dev(a, "class", "svelte-1v5kdt0");
-    			add_location(a, file$F, 57, 4, 1314);
+    			add_location(a, file$F, 57, 4, 1319);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, a, anchor);
@@ -17220,7 +17220,7 @@ var app = (function () {
     			create_component(tabbar.$$.fragment);
     			t = space();
     			create_component(router.$$.fragment);
-    			add_location(main, file$F, 37, 0, 616);
+    			add_location(main, file$F, 37, 0, 621);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17289,9 +17289,9 @@ var app = (function () {
     	let keyedTabs = [
     		{
     			k: 3,
-    			icon: "search",
-    			label: "BUSCAR",
-    			url: "/buscar"
+    			icon: "info",
+    			label: "INFORM.",
+    			url: "/informacion"
     		},
     		{
     			k: 1,
@@ -17302,7 +17302,7 @@ var app = (function () {
     		{
     			k: 4,
     			icon: "share",
-    			label: "COMPARTE",
+    			label: "COMPARTIR",
     			url: "/compartir"
     		}
     	];

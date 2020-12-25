@@ -14,9 +14,9 @@
   let keyedTabs = [
     {
       k: 3,
-      icon: 'search',
-      label: 'BUSCAR',
-      url:'/buscar'
+      icon: 'info',
+      label: 'INFORM.',
+      url:'/informacion'
     },
     {
       k: 1,
@@ -27,7 +27,7 @@
     {
       k: 4,
       icon: 'share',
-      label: 'COMPARTE',
+      label: 'COMPARTIR',
       url: '/compartir'
     }
   ];
