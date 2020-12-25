@@ -318,6 +318,9 @@ var app = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
+    function add_flush_callback(fn) {
+        flush_callbacks.push(fn);
+    }
     let flushing = false;
     const seen_callbacks = new Set();
     function flush() {
@@ -529,6 +532,96 @@ var app = (function () {
         : typeof globalThis !== 'undefined'
             ? globalThis
             : global);
+    function outro_and_destroy_block(block, lookup) {
+        transition_out(block, 1, 1, () => {
+            lookup.delete(block.key);
+        });
+    }
+    function update_keyed_each(old_blocks, dirty, get_key, dynamic, ctx, list, lookup, node, destroy, create_each_block, next, get_context) {
+        let o = old_blocks.length;
+        let n = list.length;
+        let i = o;
+        const old_indexes = {};
+        while (i--)
+            old_indexes[old_blocks[i].key] = i;
+        const new_blocks = [];
+        const new_lookup = new Map();
+        const deltas = new Map();
+        i = n;
+        while (i--) {
+            const child_ctx = get_context(ctx, list, i);
+            const key = get_key(child_ctx);
+            let block = lookup.get(key);
+            if (!block) {
+                block = create_each_block(key, child_ctx);
+                block.c();
+            }
+            else if (dynamic) {
+                block.p(child_ctx, dirty);
+            }
+            new_lookup.set(key, new_blocks[i] = block);
+            if (key in old_indexes)
+                deltas.set(key, Math.abs(i - old_indexes[key]));
+        }
+        const will_move = new Set();
+        const did_move = new Set();
+        function insert(block) {
+            transition_in(block, 1);
+            block.m(node, next);
+            lookup.set(block.key, block);
+            next = block.first;
+            n--;
+        }
+        while (o && n) {
+            const new_block = new_blocks[n - 1];
+            const old_block = old_blocks[o - 1];
+            const new_key = new_block.key;
+            const old_key = old_block.key;
+            if (new_block === old_block) {
+                // do nothing
+                next = new_block.first;
+                o--;
+                n--;
+            }
+            else if (!new_lookup.has(old_key)) {
+                // remove old block
+                destroy(old_block, lookup);
+                o--;
+            }
+            else if (!lookup.has(new_key) || will_move.has(new_key)) {
+                insert(new_block);
+            }
+            else if (did_move.has(old_key)) {
+                o--;
+            }
+            else if (deltas.get(new_key) > deltas.get(old_key)) {
+                did_move.add(new_key);
+                insert(new_block);
+            }
+            else {
+                will_move.add(old_key);
+                o--;
+            }
+        }
+        while (o--) {
+            const old_block = old_blocks[o];
+            if (!new_lookup.has(old_block.key))
+                destroy(old_block, lookup);
+        }
+        while (n)
+            insert(new_blocks[n - 1]);
+        return new_blocks;
+    }
+    function validate_each_keys(ctx, list, get_context, get_key) {
+        const keys = new Set();
+        for (let i = 0; i < list.length; i++) {
+            const key = get_key(get_context(ctx, list, i));
+            if (keys.has(key)) {
+                throw new Error('Cannot have duplicate keys in a keyed each');
+            }
+            keys.add(key);
+        }
+    }
 
     function get_spread_update(levels, updates) {
         const update = {};
@@ -565,6 +658,14 @@ var app = (function () {
     }
     function get_spread_object(spread_props) {
         return typeof spread_props === 'object' && spread_props !== null ? spread_props : {};
+    }
+
+    function bind(component, name, callback) {
+        const index = component.$$.props[name];
+        if (index !== undefined) {
+            component.$$.bound[index] = callback;
+            callback(component.$$.ctx[index]);
+        }
     }
     function create_component(block) {
         block && block.c();
@@ -725,6 +826,22 @@ var app = (function () {
             dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
         else
             dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
+    }
+    function set_data_dev(text, data) {
+        data = '' + data;
+        if (text.wholeText === data)
+            return;
+        dispatch_dev('SvelteDOMSetData', { node: text, data });
+        text.data = data;
+    }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
     }
     function validate_slots(name, slot, keys) {
         for (const slot_key of Object.keys(slot)) {
@@ -12274,128 +12391,672 @@ var app = (function () {
         '*': NotFound
     };
 
-    /* src/App.svelte generated by Svelte v3.31.0 */
-    const file$z = "src/App.svelte";
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var cssClasses$2 = {
+        ACTIVE: 'mdc-tab-indicator--active',
+        FADE: 'mdc-tab-indicator--fade',
+        NO_TRANSITION: 'mdc-tab-indicator--no-transition',
+    };
+    var strings$2 = {
+        CONTENT_SELECTOR: '.mdc-tab-indicator__content',
+    };
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabIndicatorFoundation = /** @class */ (function (_super) {
+        __extends(MDCTabIndicatorFoundation, _super);
+        function MDCTabIndicatorFoundation(adapter) {
+            return _super.call(this, __assign({}, MDCTabIndicatorFoundation.defaultAdapter, adapter)) || this;
+        }
+        Object.defineProperty(MDCTabIndicatorFoundation, "cssClasses", {
+            get: function () {
+                return cssClasses$2;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabIndicatorFoundation, "strings", {
+            get: function () {
+                return strings$2;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabIndicatorFoundation, "defaultAdapter", {
+            get: function () {
+                // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+                return {
+                    addClass: function () { return undefined; },
+                    removeClass: function () { return undefined; },
+                    computeContentClientRect: function () { return ({ top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0 }); },
+                    setContentStyleProperty: function () { return undefined; },
+                };
+                // tslint:enable:object-literal-sort-keys
+            },
+            enumerable: true,
+            configurable: true
+        });
+        MDCTabIndicatorFoundation.prototype.computeContentClientRect = function () {
+            return this.adapter_.computeContentClientRect();
+        };
+        return MDCTabIndicatorFoundation;
+    }(MDCFoundation));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    /* istanbul ignore next: subclass is not a branch statement */
+    var MDCFadingTabIndicatorFoundation = /** @class */ (function (_super) {
+        __extends(MDCFadingTabIndicatorFoundation, _super);
+        function MDCFadingTabIndicatorFoundation() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCFadingTabIndicatorFoundation.prototype.activate = function () {
+            this.adapter_.addClass(MDCTabIndicatorFoundation.cssClasses.ACTIVE);
+        };
+        MDCFadingTabIndicatorFoundation.prototype.deactivate = function () {
+            this.adapter_.removeClass(MDCTabIndicatorFoundation.cssClasses.ACTIVE);
+        };
+        return MDCFadingTabIndicatorFoundation;
+    }(MDCTabIndicatorFoundation));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    /* istanbul ignore next: subclass is not a branch statement */
+    var MDCSlidingTabIndicatorFoundation = /** @class */ (function (_super) {
+        __extends(MDCSlidingTabIndicatorFoundation, _super);
+        function MDCSlidingTabIndicatorFoundation() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCSlidingTabIndicatorFoundation.prototype.activate = function (previousIndicatorClientRect) {
+            // Early exit if no indicator is present to handle cases where an indicator
+            // may be activated without a prior indicator state
+            if (!previousIndicatorClientRect) {
+                this.adapter_.addClass(MDCTabIndicatorFoundation.cssClasses.ACTIVE);
+                return;
+            }
+            // This animation uses the FLIP approach. You can read more about it at the link below:
+            // https://aerotwist.com/blog/flip-your-animations/
+            // Calculate the dimensions based on the dimensions of the previous indicator
+            var currentClientRect = this.computeContentClientRect();
+            var widthDelta = previousIndicatorClientRect.width / currentClientRect.width;
+            var xPosition = previousIndicatorClientRect.left - currentClientRect.left;
+            this.adapter_.addClass(MDCTabIndicatorFoundation.cssClasses.NO_TRANSITION);
+            this.adapter_.setContentStyleProperty('transform', "translateX(" + xPosition + "px) scaleX(" + widthDelta + ")");
+            // Force repaint before updating classes and transform to ensure the transform properly takes effect
+            this.computeContentClientRect();
+            this.adapter_.removeClass(MDCTabIndicatorFoundation.cssClasses.NO_TRANSITION);
+            this.adapter_.addClass(MDCTabIndicatorFoundation.cssClasses.ACTIVE);
+            this.adapter_.setContentStyleProperty('transform', '');
+        };
+        MDCSlidingTabIndicatorFoundation.prototype.deactivate = function () {
+            this.adapter_.removeClass(MDCTabIndicatorFoundation.cssClasses.ACTIVE);
+        };
+        return MDCSlidingTabIndicatorFoundation;
+    }(MDCTabIndicatorFoundation));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabIndicator = /** @class */ (function (_super) {
+        __extends(MDCTabIndicator, _super);
+        function MDCTabIndicator() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCTabIndicator.attachTo = function (root) {
+            return new MDCTabIndicator(root);
+        };
+        MDCTabIndicator.prototype.initialize = function () {
+            this.content_ = this.root_.querySelector(MDCTabIndicatorFoundation.strings.CONTENT_SELECTOR);
+        };
+        MDCTabIndicator.prototype.computeContentClientRect = function () {
+            return this.foundation_.computeContentClientRect();
+        };
+        MDCTabIndicator.prototype.getDefaultFoundation = function () {
+            var _this = this;
+            // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
+            // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+            // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+            var adapter = {
+                addClass: function (className) { return _this.root_.classList.add(className); },
+                removeClass: function (className) { return _this.root_.classList.remove(className); },
+                computeContentClientRect: function () { return _this.content_.getBoundingClientRect(); },
+                setContentStyleProperty: function (prop, value) { return _this.content_.style.setProperty(prop, value); },
+            };
+            // tslint:enable:object-literal-sort-keys
+            if (this.root_.classList.contains(MDCTabIndicatorFoundation.cssClasses.FADE)) {
+                return new MDCFadingTabIndicatorFoundation(adapter);
+            }
+            // Default to the sliding indicator
+            return new MDCSlidingTabIndicatorFoundation(adapter);
+        };
+        MDCTabIndicator.prototype.activate = function (previousIndicatorClientRect) {
+            this.foundation_.activate(previousIndicatorClientRect);
+        };
+        MDCTabIndicator.prototype.deactivate = function () {
+            this.foundation_.deactivate();
+        };
+        return MDCTabIndicator;
+    }(MDCComponent));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var cssClasses$3 = {
+        ACTIVE: 'mdc-tab--active',
+    };
+    var strings$3 = {
+        ARIA_SELECTED: 'aria-selected',
+        CONTENT_SELECTOR: '.mdc-tab__content',
+        INTERACTED_EVENT: 'MDCTab:interacted',
+        RIPPLE_SELECTOR: '.mdc-tab__ripple',
+        TABINDEX: 'tabIndex',
+        TAB_INDICATOR_SELECTOR: '.mdc-tab-indicator',
+    };
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabFoundation = /** @class */ (function (_super) {
+        __extends(MDCTabFoundation, _super);
+        function MDCTabFoundation(adapter) {
+            var _this = _super.call(this, __assign({}, MDCTabFoundation.defaultAdapter, adapter)) || this;
+            _this.focusOnActivate_ = true;
+            return _this;
+        }
+        Object.defineProperty(MDCTabFoundation, "cssClasses", {
+            get: function () {
+                return cssClasses$3;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabFoundation, "strings", {
+            get: function () {
+                return strings$3;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabFoundation, "defaultAdapter", {
+            get: function () {
+                // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+                return {
+                    addClass: function () { return undefined; },
+                    removeClass: function () { return undefined; },
+                    hasClass: function () { return false; },
+                    setAttr: function () { return undefined; },
+                    activateIndicator: function () { return undefined; },
+                    deactivateIndicator: function () { return undefined; },
+                    notifyInteracted: function () { return undefined; },
+                    getOffsetLeft: function () { return 0; },
+                    getOffsetWidth: function () { return 0; },
+                    getContentOffsetLeft: function () { return 0; },
+                    getContentOffsetWidth: function () { return 0; },
+                    focus: function () { return undefined; },
+                };
+                // tslint:enable:object-literal-sort-keys
+            },
+            enumerable: true,
+            configurable: true
+        });
+        MDCTabFoundation.prototype.handleClick = function () {
+            // It's up to the parent component to keep track of the active Tab and
+            // ensure we don't activate a Tab that's already active.
+            this.adapter_.notifyInteracted();
+        };
+        MDCTabFoundation.prototype.isActive = function () {
+            return this.adapter_.hasClass(cssClasses$3.ACTIVE);
+        };
+        /**
+         * Sets whether the tab should focus itself when activated
+         */
+        MDCTabFoundation.prototype.setFocusOnActivate = function (focusOnActivate) {
+            this.focusOnActivate_ = focusOnActivate;
+        };
+        /**
+         * Activates the Tab
+         */
+        MDCTabFoundation.prototype.activate = function (previousIndicatorClientRect) {
+            this.adapter_.addClass(cssClasses$3.ACTIVE);
+            this.adapter_.setAttr(strings$3.ARIA_SELECTED, 'true');
+            this.adapter_.setAttr(strings$3.TABINDEX, '0');
+            this.adapter_.activateIndicator(previousIndicatorClientRect);
+            if (this.focusOnActivate_) {
+                this.adapter_.focus();
+            }
+        };
+        /**
+         * Deactivates the Tab
+         */
+        MDCTabFoundation.prototype.deactivate = function () {
+            // Early exit
+            if (!this.isActive()) {
+                return;
+            }
+            this.adapter_.removeClass(cssClasses$3.ACTIVE);
+            this.adapter_.setAttr(strings$3.ARIA_SELECTED, 'false');
+            this.adapter_.setAttr(strings$3.TABINDEX, '-1');
+            this.adapter_.deactivateIndicator();
+        };
+        /**
+         * Returns the dimensions of the Tab
+         */
+        MDCTabFoundation.prototype.computeDimensions = function () {
+            var rootWidth = this.adapter_.getOffsetWidth();
+            var rootLeft = this.adapter_.getOffsetLeft();
+            var contentWidth = this.adapter_.getContentOffsetWidth();
+            var contentLeft = this.adapter_.getContentOffsetLeft();
+            return {
+                contentLeft: rootLeft + contentLeft,
+                contentRight: rootLeft + contentLeft + contentWidth,
+                rootLeft: rootLeft,
+                rootRight: rootLeft + rootWidth,
+            };
+        };
+        return MDCTabFoundation;
+    }(MDCFoundation));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTab = /** @class */ (function (_super) {
+        __extends(MDCTab, _super);
+        function MDCTab() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCTab.attachTo = function (root) {
+            return new MDCTab(root);
+        };
+        MDCTab.prototype.initialize = function (rippleFactory, tabIndicatorFactory) {
+            if (rippleFactory === void 0) { rippleFactory = function (el, foundation) { return new MDCRipple(el, foundation); }; }
+            if (tabIndicatorFactory === void 0) { tabIndicatorFactory = function (el) { return new MDCTabIndicator(el); }; }
+            this.id = this.root_.id;
+            var rippleSurface = this.root_.querySelector(MDCTabFoundation.strings.RIPPLE_SELECTOR);
+            var rippleAdapter = __assign({}, MDCRipple.createAdapter(this), { addClass: function (className) { return rippleSurface.classList.add(className); }, removeClass: function (className) { return rippleSurface.classList.remove(className); }, updateCssVariable: function (varName, value) { return rippleSurface.style.setProperty(varName, value); } });
+            var rippleFoundation = new MDCRippleFoundation(rippleAdapter);
+            this.ripple_ = rippleFactory(this.root_, rippleFoundation);
+            var tabIndicatorElement = this.root_.querySelector(MDCTabFoundation.strings.TAB_INDICATOR_SELECTOR);
+            this.tabIndicator_ = tabIndicatorFactory(tabIndicatorElement);
+            this.content_ = this.root_.querySelector(MDCTabFoundation.strings.CONTENT_SELECTOR);
+        };
+        MDCTab.prototype.initialSyncWithDOM = function () {
+            var _this = this;
+            this.handleClick_ = function () { return _this.foundation_.handleClick(); };
+            this.listen('click', this.handleClick_);
+        };
+        MDCTab.prototype.destroy = function () {
+            this.unlisten('click', this.handleClick_);
+            this.ripple_.destroy();
+            _super.prototype.destroy.call(this);
+        };
+        MDCTab.prototype.getDefaultFoundation = function () {
+            var _this = this;
+            // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
+            // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+            // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+            var adapter = {
+                setAttr: function (attr, value) { return _this.root_.setAttribute(attr, value); },
+                addClass: function (className) { return _this.root_.classList.add(className); },
+                removeClass: function (className) { return _this.root_.classList.remove(className); },
+                hasClass: function (className) { return _this.root_.classList.contains(className); },
+                activateIndicator: function (previousIndicatorClientRect) { return _this.tabIndicator_.activate(previousIndicatorClientRect); },
+                deactivateIndicator: function () { return _this.tabIndicator_.deactivate(); },
+                notifyInteracted: function () { return _this.emit(MDCTabFoundation.strings.INTERACTED_EVENT, { tabId: _this.id }, true /* bubble */); },
+                getOffsetLeft: function () { return _this.root_.offsetLeft; },
+                getOffsetWidth: function () { return _this.root_.offsetWidth; },
+                getContentOffsetLeft: function () { return _this.content_.offsetLeft; },
+                getContentOffsetWidth: function () { return _this.content_.offsetWidth; },
+                focus: function () { return _this.root_.focus(); },
+            };
+            // tslint:enable:object-literal-sort-keys
+            return new MDCTabFoundation(adapter);
+        };
+        Object.defineProperty(MDCTab.prototype, "active", {
+            /**
+             * Getter for the active state of the tab
+             */
+            get: function () {
+                return this.foundation_.isActive();
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTab.prototype, "focusOnActivate", {
+            set: function (focusOnActivate) {
+                this.foundation_.setFocusOnActivate(focusOnActivate);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Activates the tab
+         */
+        MDCTab.prototype.activate = function (computeIndicatorClientRect) {
+            this.foundation_.activate(computeIndicatorClientRect);
+        };
+        /**
+         * Deactivates the tab
+         */
+        MDCTab.prototype.deactivate = function () {
+            this.foundation_.deactivate();
+        };
+        /**
+         * Returns the indicator's client rect
+         */
+        MDCTab.prototype.computeIndicatorClientRect = function () {
+            return this.tabIndicator_.computeContentClientRect();
+        };
+        MDCTab.prototype.computeDimensions = function () {
+            return this.foundation_.computeDimensions();
+        };
+        /**
+         * Focuses the tab
+         */
+        MDCTab.prototype.focus = function () {
+            this.root_.focus();
+        };
+        return MDCTab;
+    }(MDCComponent));
+
+    function prefixFilter(obj, prefix) {
+      let names = Object.getOwnPropertyNames(obj);
+      const newObj = {};
+
+      for (let i = 0; i < names.length; i++) {
+        const name = names[i];
+        if (name.substring(0, prefix.length) === prefix) {
+          newObj[name.substring(prefix.length)] = obj[name];
+        }
+      }
+
+      return newObj;
+    }
+
+    /* node_modules/@smui/tab-indicator/TabIndicator.svelte generated by Svelte v3.31.0 */
+    const file$z = "node_modules/@smui/tab-indicator/TabIndicator.svelte";
 
     function create_fragment$C(ctx) {
-    	let main;
-    	let nav;
-    	let div;
-    	let a0;
-    	let img;
-    	let img_src_value;
-    	let link_action;
-    	let t0;
-    	let ul0;
-    	let li0;
-    	let a1;
-    	let i0;
-    	let link_action_1;
-    	let t2;
-    	let ul1;
-    	let li1;
-    	let a2;
-    	let i1;
-    	let t4;
-    	let router;
+    	let span1;
+    	let span0;
+    	let span0_class_value;
+    	let span0_aria_hidden_value;
+    	let useActions_action;
+    	let span1_class_value;
+    	let useActions_action_1;
+    	let forwardEvents_action;
     	let current;
     	let mounted;
     	let dispose;
-    	router = new Router({ props: { routes }, $$inline: true });
+    	const default_slot_template = /*#slots*/ ctx[14].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[13], null);
+
+    	let span0_levels = [
+    		{
+    			class: span0_class_value = "\n      mdc-tab-indicator__content\n      " + /*content$class*/ ctx[6] + "\n      " + (/*type*/ ctx[3] === "underline"
+    			? "mdc-tab-indicator__content--underline"
+    			: "") + "\n      " + (/*type*/ ctx[3] === "icon"
+    			? "mdc-tab-indicator__content--icon"
+    			: "") + "\n    "
+    		},
+    		{
+    			"aria-hidden": span0_aria_hidden_value = /*type*/ ctx[3] === "icon" ? "true" : "false"
+    		},
+    		exclude(prefixFilter(/*$$props*/ ctx[9], "content$"), ["use", "class"])
+    	];
+
+    	let span0_data = {};
+
+    	for (let i = 0; i < span0_levels.length; i += 1) {
+    		span0_data = assign(span0_data, span0_levels[i]);
+    	}
+
+    	let span1_levels = [
+    		{
+    			class: span1_class_value = "\n    mdc-tab-indicator\n    " + /*className*/ ctx[1] + "\n    " + (/*active*/ ctx[2] ? "mdc-tab-indicator--active" : "") + "\n    " + (/*transition*/ ctx[4] === "fade"
+    			? "mdc-tab-indicator--fade"
+    			: "") + "\n  "
+    		},
+    		exclude(/*$$props*/ ctx[9], ["use", "class", "active", "type", "transition", "content$"])
+    	];
+
+    	let span1_data = {};
+
+    	for (let i = 0; i < span1_levels.length; i += 1) {
+    		span1_data = assign(span1_data, span1_levels[i]);
+    	}
 
     	const block = {
     		c: function create() {
-    			main = element("main");
-    			nav = element("nav");
-    			div = element("div");
-    			a0 = element("a");
-    			img = element("img");
-    			t0 = space();
-    			ul0 = element("ul");
-    			li0 = element("li");
-    			a1 = element("a");
-    			i0 = element("i");
-    			i0.textContent = "info_outline";
-    			t2 = space();
-    			ul1 = element("ul");
-    			li1 = element("li");
-    			a2 = element("a");
-    			i1 = element("i");
-    			i1.textContent = "share";
-    			t4 = space();
-    			create_component(router.$$.fragment);
-    			if (img.src !== (img_src_value = "img/Icon_menu/inicio.svg")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "inicio");
-    			attr_dev(img, "width", "80%");
-    			add_location(img, file$z, 16, 57, 350);
-    			attr_dev(a0, "href", "/");
-    			attr_dev(a0, "class", "brand-logo center");
-    			add_location(a0, file$z, 16, 10, 303);
-    			attr_dev(i0, "class", "material-icons brown-text darken-2-text");
-    			add_location(i0, file$z, 19, 51, 514);
-    			attr_dev(a1, "href", "/Informacion");
-    			add_location(a1, file$z, 19, 18, 481);
-    			add_location(li0, file$z, 19, 14, 477);
-    			attr_dev(ul0, "id", "nav-mobile left");
-    			add_location(ul0, file$z, 18, 10, 437);
-    			attr_dev(i1, "class", "material-icons brown-text darken-2-text");
-    			add_location(i1, file$z, 23, 47, 695);
-    			add_location(a2, file$z, 23, 18, 666);
-    			add_location(li1, file$z, 23, 14, 662);
-    			attr_dev(ul1, "class", "nav-mobile right");
-    			add_location(ul1, file$z, 22, 10, 618);
-    			attr_dev(div, "class", "nav-fixed");
-    			add_location(div, file$z, 15, 6, 269);
-    			attr_dev(nav, "class", "navbarbaja svelte-1h8dx1g");
-    			add_location(nav, file$z, 14, 4, 238);
-    			add_location(main, file$z, 11, 0, 199);
+    			span1 = element("span");
+    			span0 = element("span");
+    			if (default_slot) default_slot.c();
+    			set_attributes(span0, span0_data);
+    			add_location(span0, file$z, 12, 2, 322);
+    			set_attributes(span1, span1_data);
+    			add_location(span1, file$z, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, main, anchor);
-    			append_dev(main, nav);
-    			append_dev(nav, div);
-    			append_dev(div, a0);
-    			append_dev(a0, img);
-    			append_dev(div, t0);
-    			append_dev(div, ul0);
-    			append_dev(ul0, li0);
-    			append_dev(li0, a1);
-    			append_dev(a1, i0);
-    			append_dev(div, t2);
-    			append_dev(div, ul1);
-    			append_dev(ul1, li1);
-    			append_dev(li1, a2);
-    			append_dev(a2, i1);
-    			append_dev(main, t4);
-    			mount_component(router, main, null);
+    			insert_dev(target, span1, anchor);
+    			append_dev(span1, span0);
+
+    			if (default_slot) {
+    				default_slot.m(span0, null);
+    			}
+
+    			/*span1_binding*/ ctx[15](span1);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					action_destroyer(link_action = link.call(null, a0)),
-    					action_destroyer(link_action_1 = link.call(null, a1)),
-    					listen_dev(a2, "click", /*click_handler*/ ctx[0], false, false, false)
+    					action_destroyer(useActions_action = useActions.call(null, span0, /*content$use*/ ctx[5])),
+    					action_destroyer(useActions_action_1 = useActions.call(null, span1, /*use*/ ctx[0])),
+    					action_destroyer(forwardEvents_action = /*forwardEvents*/ ctx[8].call(null, span1))
     				];
 
     				mounted = true;
     			}
     		},
-    		p: noop,
+    		p: function update(ctx, [dirty]) {
+    			if (default_slot) {
+    				if (default_slot.p && dirty & /*$$scope*/ 8192) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[13], dirty, null, null);
+    				}
+    			}
+
+    			set_attributes(span0, span0_data = get_spread_update(span0_levels, [
+    				(!current || dirty & /*content$class, type*/ 72 && span0_class_value !== (span0_class_value = "\n      mdc-tab-indicator__content\n      " + /*content$class*/ ctx[6] + "\n      " + (/*type*/ ctx[3] === "underline"
+    				? "mdc-tab-indicator__content--underline"
+    				: "") + "\n      " + (/*type*/ ctx[3] === "icon"
+    				? "mdc-tab-indicator__content--icon"
+    				: "") + "\n    ")) && { class: span0_class_value },
+    				(!current || dirty & /*type*/ 8 && span0_aria_hidden_value !== (span0_aria_hidden_value = /*type*/ ctx[3] === "icon" ? "true" : "false")) && { "aria-hidden": span0_aria_hidden_value },
+    				dirty & /*$$props*/ 512 && exclude(prefixFilter(/*$$props*/ ctx[9], "content$"), ["use", "class"])
+    			]));
+
+    			if (useActions_action && is_function(useActions_action.update) && dirty & /*content$use*/ 32) useActions_action.update.call(null, /*content$use*/ ctx[5]);
+
+    			set_attributes(span1, span1_data = get_spread_update(span1_levels, [
+    				(!current || dirty & /*className, active, transition*/ 22 && span1_class_value !== (span1_class_value = "\n    mdc-tab-indicator\n    " + /*className*/ ctx[1] + "\n    " + (/*active*/ ctx[2] ? "mdc-tab-indicator--active" : "") + "\n    " + (/*transition*/ ctx[4] === "fade"
+    				? "mdc-tab-indicator--fade"
+    				: "") + "\n  ")) && { class: span1_class_value },
+    				dirty & /*$$props*/ 512 && exclude(/*$$props*/ ctx[9], ["use", "class", "active", "type", "transition", "content$"])
+    			]));
+
+    			if (useActions_action_1 && is_function(useActions_action_1.update) && dirty & /*use*/ 1) useActions_action_1.update.call(null, /*use*/ ctx[0]);
+    		},
     		i: function intro(local) {
     			if (current) return;
-    			transition_in(router.$$.fragment, local);
+    			transition_in(default_slot, local);
     			current = true;
     		},
     		o: function outro(local) {
-    			transition_out(router.$$.fragment, local);
+    			transition_out(default_slot, local);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(main);
-    			destroy_component(router);
+    			if (detaching) detach_dev(span1);
+    			if (default_slot) default_slot.d(detaching);
+    			/*span1_binding*/ ctx[15](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -12412,34 +13073,4292 @@ var app = (function () {
     	return block;
     }
 
+    function instance$C($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("TabIndicator", slots, ['default']);
+    	const forwardEvents = forwardEventsBuilder(get_current_component());
+    	let { use = [] } = $$props;
+    	let { class: className = "" } = $$props;
+    	let { active = false } = $$props;
+    	let { type = "underline" } = $$props;
+    	let { transition = "slide" } = $$props;
+    	let { content$use = [] } = $$props;
+    	let { content$class = "" } = $$props;
+    	let element;
+    	let tabIndicator;
+    	let instantiate = getContext("SMUI:tab-indicator:instantiate");
+    	let getInstance = getContext("SMUI:tab-indicator:getInstance");
+
+    	onMount(async () => {
+    		if (instantiate !== false) {
+    			tabIndicator = new MDCTabIndicator(element);
+    		} else {
+    			tabIndicator = await getInstance();
+    		}
+    	});
+
+    	onDestroy(() => {
+    		tabIndicator && tabIndicator.destroy();
+    	});
+
+    	function activate(...args) {
+    		return tabIndicator.activate(...args);
+    	}
+
+    	function deactivate(...args) {
+    		return tabIndicator.deactivate(...args);
+    	}
+
+    	function computeContentClientRect(...args) {
+    		return tabIndicator.computeContentClientRect(...args);
+    	}
+
+    	function span1_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			element = $$value;
+    			$$invalidate(7, element);
+    		});
+    	}
+
+    	$$self.$$set = $$new_props => {
+    		$$invalidate(9, $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)));
+    		if ("use" in $$new_props) $$invalidate(0, use = $$new_props.use);
+    		if ("class" in $$new_props) $$invalidate(1, className = $$new_props.class);
+    		if ("active" in $$new_props) $$invalidate(2, active = $$new_props.active);
+    		if ("type" in $$new_props) $$invalidate(3, type = $$new_props.type);
+    		if ("transition" in $$new_props) $$invalidate(4, transition = $$new_props.transition);
+    		if ("content$use" in $$new_props) $$invalidate(5, content$use = $$new_props.content$use);
+    		if ("content$class" in $$new_props) $$invalidate(6, content$class = $$new_props.content$class);
+    		if ("$$scope" in $$new_props) $$invalidate(13, $$scope = $$new_props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		MDCTabIndicator,
+    		onMount,
+    		onDestroy,
+    		getContext,
+    		get_current_component,
+    		forwardEventsBuilder,
+    		exclude,
+    		prefixFilter,
+    		useActions,
+    		forwardEvents,
+    		use,
+    		className,
+    		active,
+    		type,
+    		transition,
+    		content$use,
+    		content$class,
+    		element,
+    		tabIndicator,
+    		instantiate,
+    		getInstance,
+    		activate,
+    		deactivate,
+    		computeContentClientRect
+    	});
+
+    	$$self.$inject_state = $$new_props => {
+    		$$invalidate(9, $$props = assign(assign({}, $$props), $$new_props));
+    		if ("use" in $$props) $$invalidate(0, use = $$new_props.use);
+    		if ("className" in $$props) $$invalidate(1, className = $$new_props.className);
+    		if ("active" in $$props) $$invalidate(2, active = $$new_props.active);
+    		if ("type" in $$props) $$invalidate(3, type = $$new_props.type);
+    		if ("transition" in $$props) $$invalidate(4, transition = $$new_props.transition);
+    		if ("content$use" in $$props) $$invalidate(5, content$use = $$new_props.content$use);
+    		if ("content$class" in $$props) $$invalidate(6, content$class = $$new_props.content$class);
+    		if ("element" in $$props) $$invalidate(7, element = $$new_props.element);
+    		if ("tabIndicator" in $$props) tabIndicator = $$new_props.tabIndicator;
+    		if ("instantiate" in $$props) instantiate = $$new_props.instantiate;
+    		if ("getInstance" in $$props) getInstance = $$new_props.getInstance;
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$props = exclude_internal_props($$props);
+
+    	return [
+    		use,
+    		className,
+    		active,
+    		type,
+    		transition,
+    		content$use,
+    		content$class,
+    		element,
+    		forwardEvents,
+    		$$props,
+    		activate,
+    		deactivate,
+    		computeContentClientRect,
+    		$$scope,
+    		slots,
+    		span1_binding
+    	];
+    }
+
+    class TabIndicator extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$C, create_fragment$C, safe_not_equal, {
+    			use: 0,
+    			class: 1,
+    			active: 2,
+    			type: 3,
+    			transition: 4,
+    			content$use: 5,
+    			content$class: 6,
+    			activate: 10,
+    			deactivate: 11,
+    			computeContentClientRect: 12
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "TabIndicator",
+    			options,
+    			id: create_fragment$C.name
+    		});
+    	}
+
+    	get use() {
+    		throw new Error("<TabIndicator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set use(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get class() {
+    		throw new Error("<TabIndicator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set class(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get active() {
+    		throw new Error("<TabIndicator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set active(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get type() {
+    		throw new Error("<TabIndicator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set type(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get transition() {
+    		throw new Error("<TabIndicator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set transition(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get content$use() {
+    		throw new Error("<TabIndicator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set content$use(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get content$class() {
+    		throw new Error("<TabIndicator>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set content$class(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get activate() {
+    		return this.$$.ctx[10];
+    	}
+
+    	set activate(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get deactivate() {
+    		return this.$$.ctx[11];
+    	}
+
+    	set deactivate(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get computeContentClientRect() {
+    		return this.$$.ctx[12];
+    	}
+
+    	set computeContentClientRect(value) {
+    		throw new Error("<TabIndicator>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules/@smui/tab/Tab.svelte generated by Svelte v3.31.0 */
+
+    const { Error: Error_1$1 } = globals;
+    const file$A = "node_modules/@smui/tab/Tab.svelte";
+    const get_tab_indicator_slot_changes_1 = dirty => ({});
+    const get_tab_indicator_slot_context_1 = ctx => ({});
+    const get_tab_indicator_slot_changes = dirty => ({});
+    const get_tab_indicator_slot_context = ctx => ({});
+
+    // (24:4) {#if indicatorSpanOnlyContent}
+    function create_if_block_2$1(ctx) {
+    	let tabindicator;
+    	let current;
+
+    	const tabindicator_spread_levels = [
+    		{ active: /*active*/ ctx[0] },
+    		prefixFilter(/*$$props*/ ctx[12], "tabIndicator$")
+    	];
+
+    	let tabindicator_props = {
+    		$$slots: { default: [create_default_slot_1] },
+    		$$scope: { ctx }
+    	};
+
+    	for (let i = 0; i < tabindicator_spread_levels.length; i += 1) {
+    		tabindicator_props = assign(tabindicator_props, tabindicator_spread_levels[i]);
+    	}
+
+    	tabindicator = new TabIndicator({
+    			props: tabindicator_props,
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(tabindicator.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(tabindicator, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const tabindicator_changes = (dirty & /*active, prefixFilter, $$props*/ 4097)
+    			? get_spread_update(tabindicator_spread_levels, [
+    					dirty & /*active*/ 1 && { active: /*active*/ ctx[0] },
+    					dirty & /*prefixFilter, $$props*/ 4096 && get_spread_object(prefixFilter(/*$$props*/ ctx[12], "tabIndicator$"))
+    				])
+    			: {};
+
+    			if (dirty & /*$$scope*/ 8388608) {
+    				tabindicator_changes.$$scope = { dirty, ctx };
+    			}
+
+    			tabindicator.$set(tabindicator_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tabindicator.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tabindicator.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(tabindicator, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$1.name,
+    		type: "if",
+    		source: "(24:4) {#if indicatorSpanOnlyContent}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (25:6) <TabIndicator         {active}         {...prefixFilter($$props, 'tabIndicator$')}       >
+    function create_default_slot_1(ctx) {
+    	let current;
+    	const tab_indicator_slot_template = /*#slots*/ ctx[21]["tab-indicator"];
+    	const tab_indicator_slot = create_slot(tab_indicator_slot_template, ctx, /*$$scope*/ ctx[23], get_tab_indicator_slot_context);
+
+    	const block = {
+    		c: function create() {
+    			if (tab_indicator_slot) tab_indicator_slot.c();
+    		},
+    		m: function mount(target, anchor) {
+    			if (tab_indicator_slot) {
+    				tab_indicator_slot.m(target, anchor);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (tab_indicator_slot) {
+    				if (tab_indicator_slot.p && dirty & /*$$scope*/ 8388608) {
+    					update_slot(tab_indicator_slot, tab_indicator_slot_template, ctx, /*$$scope*/ ctx[23], dirty, get_tab_indicator_slot_changes, get_tab_indicator_slot_context);
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tab_indicator_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tab_indicator_slot, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (tab_indicator_slot) tab_indicator_slot.d(detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_1.name,
+    		type: "slot",
+    		source: "(25:6) <TabIndicator         {active}         {...prefixFilter($$props, 'tabIndicator$')}       >",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (31:2) {#if !indicatorSpanOnlyContent}
+    function create_if_block_1$2(ctx) {
+    	let tabindicator;
+    	let current;
+
+    	const tabindicator_spread_levels = [
+    		{ active: /*active*/ ctx[0] },
+    		prefixFilter(/*$$props*/ ctx[12], "tabIndicator$")
+    	];
+
+    	let tabindicator_props = {
+    		$$slots: { default: [create_default_slot$1] },
+    		$$scope: { ctx }
+    	};
+
+    	for (let i = 0; i < tabindicator_spread_levels.length; i += 1) {
+    		tabindicator_props = assign(tabindicator_props, tabindicator_spread_levels[i]);
+    	}
+
+    	tabindicator = new TabIndicator({
+    			props: tabindicator_props,
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(tabindicator.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(tabindicator, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const tabindicator_changes = (dirty & /*active, prefixFilter, $$props*/ 4097)
+    			? get_spread_update(tabindicator_spread_levels, [
+    					dirty & /*active*/ 1 && { active: /*active*/ ctx[0] },
+    					dirty & /*prefixFilter, $$props*/ 4096 && get_spread_object(prefixFilter(/*$$props*/ ctx[12], "tabIndicator$"))
+    				])
+    			: {};
+
+    			if (dirty & /*$$scope*/ 8388608) {
+    				tabindicator_changes.$$scope = { dirty, ctx };
+    			}
+
+    			tabindicator.$set(tabindicator_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tabindicator.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tabindicator.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(tabindicator, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$2.name,
+    		type: "if",
+    		source: "(31:2) {#if !indicatorSpanOnlyContent}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (32:4) <TabIndicator       {active}       {...prefixFilter($$props, 'tabIndicator$')}     >
+    function create_default_slot$1(ctx) {
+    	let current;
+    	const tab_indicator_slot_template = /*#slots*/ ctx[21]["tab-indicator"];
+    	const tab_indicator_slot = create_slot(tab_indicator_slot_template, ctx, /*$$scope*/ ctx[23], get_tab_indicator_slot_context_1);
+
+    	const block = {
+    		c: function create() {
+    			if (tab_indicator_slot) tab_indicator_slot.c();
+    		},
+    		m: function mount(target, anchor) {
+    			if (tab_indicator_slot) {
+    				tab_indicator_slot.m(target, anchor);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (tab_indicator_slot) {
+    				if (tab_indicator_slot.p && dirty & /*$$scope*/ 8388608) {
+    					update_slot(tab_indicator_slot, tab_indicator_slot_template, ctx, /*$$scope*/ ctx[23], dirty, get_tab_indicator_slot_changes_1, get_tab_indicator_slot_context_1);
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tab_indicator_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tab_indicator_slot, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (tab_indicator_slot) tab_indicator_slot.d(detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot$1.name,
+    		type: "slot",
+    		source: "(32:4) <TabIndicator       {active}       {...prefixFilter($$props, 'tabIndicator$')}     >",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (37:2) {#if ripple}
+    function create_if_block$5(ctx) {
+    	let span;
+
+    	const block = {
+    		c: function create() {
+    			span = element("span");
+    			attr_dev(span, "class", "mdc-tab__ripple");
+    			add_location(span, file$A, 37, 4, 1093);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, span, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(span);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$5.name,
+    		type: "if",
+    		source: "(37:2) {#if ripple}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$D(ctx) {
+    	let button;
+    	let span;
+    	let t0;
+    	let span_class_value;
+    	let useActions_action;
+    	let t1;
+    	let t2;
+    	let button_class_value;
+    	let button_tabindex_value;
+    	let useActions_action_1;
+    	let forwardEvents_action;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	const default_slot_template = /*#slots*/ ctx[21].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[23], null);
+    	let if_block0 = /*indicatorSpanOnlyContent*/ ctx[6] && create_if_block_2$1(ctx);
+
+    	let span_levels = [
+    		{
+    			class: span_class_value = "mdc-tab__content " + /*content$class*/ ctx[8]
+    		},
+    		exclude(prefixFilter(/*$$props*/ ctx[12], "content$"), ["use", "class"])
+    	];
+
+    	let span_data = {};
+
+    	for (let i = 0; i < span_levels.length; i += 1) {
+    		span_data = assign(span_data, span_levels[i]);
+    	}
+
+    	let if_block1 = !/*indicatorSpanOnlyContent*/ ctx[6] && create_if_block_1$2(ctx);
+    	let if_block2 = /*ripple*/ ctx[3] && create_if_block$5(ctx);
+
+    	let button_levels = [
+    		{
+    			class: button_class_value = "\n    mdc-tab\n    " + /*className*/ ctx[2] + "\n    " + (/*active*/ ctx[0] ? "mdc-tab--active" : "") + "\n    " + (/*stacked*/ ctx[4] ? "mdc-tab--stacked" : "") + "\n    " + (/*minWidth*/ ctx[5] ? "mdc-tab--min-width" : "") + "\n  "
+    		},
+    		{ role: "tab" },
+    		{ "aria-selected": /*active*/ ctx[0] },
+    		{
+    			tabindex: button_tabindex_value = /*active*/ ctx[0] ? "0" : "-1"
+    		},
+    		exclude(/*$$props*/ ctx[12], [
+    			"use",
+    			"class",
+    			"ripple",
+    			"active",
+    			"stacked",
+    			"minWidth",
+    			"indicatorSpanOnlyContent",
+    			"focusOnActivate",
+    			"content$",
+    			"tabIndicator$"
+    		])
+    	];
+
+    	let button_data = {};
+
+    	for (let i = 0; i < button_levels.length; i += 1) {
+    		button_data = assign(button_data, button_levels[i]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			button = element("button");
+    			span = element("span");
+    			if (default_slot) default_slot.c();
+    			t0 = space();
+    			if (if_block0) if_block0.c();
+    			t1 = space();
+    			if (if_block1) if_block1.c();
+    			t2 = space();
+    			if (if_block2) if_block2.c();
+    			set_attributes(span, span_data);
+    			add_location(span, file$A, 17, 2, 517);
+    			set_attributes(button, button_data);
+    			add_location(button, file$A, 0, 0, 0);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error_1$1("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, button, anchor);
+    			append_dev(button, span);
+
+    			if (default_slot) {
+    				default_slot.m(span, null);
+    			}
+
+    			append_dev(span, t0);
+    			if (if_block0) if_block0.m(span, null);
+    			append_dev(button, t1);
+    			if (if_block1) if_block1.m(button, null);
+    			append_dev(button, t2);
+    			if (if_block2) if_block2.m(button, null);
+    			/*button_binding*/ ctx[22](button);
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					action_destroyer(useActions_action = useActions.call(null, span, /*content$use*/ ctx[7])),
+    					action_destroyer(useActions_action_1 = useActions.call(null, button, /*use*/ ctx[1])),
+    					action_destroyer(forwardEvents_action = /*forwardEvents*/ ctx[10].call(null, button)),
+    					listen_dev(button, "MDCTab:interacted", /*interactedHandler*/ ctx[11], false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (default_slot) {
+    				if (default_slot.p && dirty & /*$$scope*/ 8388608) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[23], dirty, null, null);
+    				}
+    			}
+
+    			if (/*indicatorSpanOnlyContent*/ ctx[6]) {
+    				if (if_block0) {
+    					if_block0.p(ctx, dirty);
+
+    					if (dirty & /*indicatorSpanOnlyContent*/ 64) {
+    						transition_in(if_block0, 1);
+    					}
+    				} else {
+    					if_block0 = create_if_block_2$1(ctx);
+    					if_block0.c();
+    					transition_in(if_block0, 1);
+    					if_block0.m(span, null);
+    				}
+    			} else if (if_block0) {
+    				group_outros();
+
+    				transition_out(if_block0, 1, 1, () => {
+    					if_block0 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			set_attributes(span, span_data = get_spread_update(span_levels, [
+    				(!current || dirty & /*content$class*/ 256 && span_class_value !== (span_class_value = "mdc-tab__content " + /*content$class*/ ctx[8])) && { class: span_class_value },
+    				dirty & /*$$props*/ 4096 && exclude(prefixFilter(/*$$props*/ ctx[12], "content$"), ["use", "class"])
+    			]));
+
+    			if (useActions_action && is_function(useActions_action.update) && dirty & /*content$use*/ 128) useActions_action.update.call(null, /*content$use*/ ctx[7]);
+
+    			if (!/*indicatorSpanOnlyContent*/ ctx[6]) {
+    				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+
+    					if (dirty & /*indicatorSpanOnlyContent*/ 64) {
+    						transition_in(if_block1, 1);
+    					}
+    				} else {
+    					if_block1 = create_if_block_1$2(ctx);
+    					if_block1.c();
+    					transition_in(if_block1, 1);
+    					if_block1.m(button, t2);
+    				}
+    			} else if (if_block1) {
+    				group_outros();
+
+    				transition_out(if_block1, 1, 1, () => {
+    					if_block1 = null;
+    				});
+
+    				check_outros();
+    			}
+
+    			if (/*ripple*/ ctx[3]) {
+    				if (if_block2) ; else {
+    					if_block2 = create_if_block$5(ctx);
+    					if_block2.c();
+    					if_block2.m(button, null);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
+    			}
+
+    			set_attributes(button, button_data = get_spread_update(button_levels, [
+    				(!current || dirty & /*className, active, stacked, minWidth*/ 53 && button_class_value !== (button_class_value = "\n    mdc-tab\n    " + /*className*/ ctx[2] + "\n    " + (/*active*/ ctx[0] ? "mdc-tab--active" : "") + "\n    " + (/*stacked*/ ctx[4] ? "mdc-tab--stacked" : "") + "\n    " + (/*minWidth*/ ctx[5] ? "mdc-tab--min-width" : "") + "\n  ")) && { class: button_class_value },
+    				{ role: "tab" },
+    				(!current || dirty & /*active*/ 1) && { "aria-selected": /*active*/ ctx[0] },
+    				(!current || dirty & /*active*/ 1 && button_tabindex_value !== (button_tabindex_value = /*active*/ ctx[0] ? "0" : "-1")) && { tabindex: button_tabindex_value },
+    				dirty & /*$$props*/ 4096 && exclude(/*$$props*/ ctx[12], [
+    					"use",
+    					"class",
+    					"ripple",
+    					"active",
+    					"stacked",
+    					"minWidth",
+    					"indicatorSpanOnlyContent",
+    					"focusOnActivate",
+    					"content$",
+    					"tabIndicator$"
+    				])
+    			]));
+
+    			if (useActions_action_1 && is_function(useActions_action_1.update) && dirty & /*use*/ 2) useActions_action_1.update.call(null, /*use*/ ctx[1]);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot, local);
+    			transition_in(if_block0);
+    			transition_in(if_block1);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot, local);
+    			transition_out(if_block0);
+    			transition_out(if_block1);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(button);
+    			if (default_slot) default_slot.d(detaching);
+    			if (if_block0) if_block0.d();
+    			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    			/*button_binding*/ ctx[22](null);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$D.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$D($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("Tab", slots, ['default','tab-indicator']);
+    	const forwardEvents = forwardEventsBuilder(get_current_component(), ["MDCTab:interacted"]);
+    	let activeEntry = getContext("SMUI:tab:active");
+    	let { use = [] } = $$props;
+    	let { class: className = "" } = $$props;
+    	let { tab: tabEntry } = $$props;
+    	let { ripple = true } = $$props;
+    	let { active = tabEntry === activeEntry } = $$props;
+    	let { stacked = false } = $$props;
+    	let { minWidth = false } = $$props;
+    	let { indicatorSpanOnlyContent = false } = $$props;
+    	let { focusOnActivate = true } = $$props;
+    	let { content$use = [] } = $$props;
+    	let { content$class = "" } = $$props;
+    	let element;
+    	let tab;
+    	let instantiate = getContext("SMUI:tab:instantiate");
+    	let getInstance = getContext("SMUI:tab:getInstance");
+    	let tabIndicatorPromiseResolve;
+    	let tabIndicatorPromise = new Promise(resolve => tabIndicatorPromiseResolve = resolve);
+    	setContext("SMUI:tab-indicator:instantiate", false);
+    	setContext("SMUI:tab-indicator:getInstance", getTabIndicatorInstancePromise);
+    	setContext("SMUI:label:context", "tab");
+    	setContext("SMUI:icon:context", "tab");
+
+    	if (!tabEntry) {
+    		throw new Error("The tab property is required! It should be passed down from the TabBar to the Tab.");
+    	}
+
+    	onMount(async () => {
+    		if (instantiate !== false) {
+    			$$invalidate(20, tab = new MDCTab(element));
+    		} else {
+    			$$invalidate(20, tab = await getInstance(tabEntry));
+    		}
+
+    		tabIndicatorPromiseResolve(tab.tabIndicator_);
+
+    		if (!ripple) {
+    			tab.ripple_ && tab.ripple_.destroy();
+    		}
+    	});
+
+    	onDestroy(() => {
+    		tab && tab.destroy();
+    	});
+
+    	function getTabIndicatorInstancePromise() {
+    		return tabIndicatorPromise;
+    	}
+
+    	function interactedHandler() {
+    		$$invalidate(0, active = tab.active);
+    	}
+
+    	function activate(...args) {
+    		$$invalidate(0, active = true);
+    		return tab.activate(...args);
+    	}
+
+    	function deactivate(...args) {
+    		$$invalidate(0, active = false);
+    		return tab.deactivate(...args);
+    	}
+
+    	function focus(...args) {
+    		return tab.focus(...args);
+    	}
+
+    	function computeIndicatorClientRect(...args) {
+    		return tab.computeIndicatorClientRect(...args);
+    	}
+
+    	function computeDimensions(...args) {
+    		return tab.computeDimensions(...args);
+    	}
+
+    	function button_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			element = $$value;
+    			$$invalidate(9, element);
+    		});
+    	}
+
+    	$$self.$$set = $$new_props => {
+    		$$invalidate(12, $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)));
+    		if ("use" in $$new_props) $$invalidate(1, use = $$new_props.use);
+    		if ("class" in $$new_props) $$invalidate(2, className = $$new_props.class);
+    		if ("tab" in $$new_props) $$invalidate(13, tabEntry = $$new_props.tab);
+    		if ("ripple" in $$new_props) $$invalidate(3, ripple = $$new_props.ripple);
+    		if ("active" in $$new_props) $$invalidate(0, active = $$new_props.active);
+    		if ("stacked" in $$new_props) $$invalidate(4, stacked = $$new_props.stacked);
+    		if ("minWidth" in $$new_props) $$invalidate(5, minWidth = $$new_props.minWidth);
+    		if ("indicatorSpanOnlyContent" in $$new_props) $$invalidate(6, indicatorSpanOnlyContent = $$new_props.indicatorSpanOnlyContent);
+    		if ("focusOnActivate" in $$new_props) $$invalidate(14, focusOnActivate = $$new_props.focusOnActivate);
+    		if ("content$use" in $$new_props) $$invalidate(7, content$use = $$new_props.content$use);
+    		if ("content$class" in $$new_props) $$invalidate(8, content$class = $$new_props.content$class);
+    		if ("$$scope" in $$new_props) $$invalidate(23, $$scope = $$new_props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		MDCTab,
+    		onMount,
+    		onDestroy,
+    		setContext,
+    		getContext,
+    		get_current_component,
+    		forwardEventsBuilder,
+    		exclude,
+    		prefixFilter,
+    		useActions,
+    		TabIndicator,
+    		forwardEvents,
+    		activeEntry,
+    		use,
+    		className,
+    		tabEntry,
+    		ripple,
+    		active,
+    		stacked,
+    		minWidth,
+    		indicatorSpanOnlyContent,
+    		focusOnActivate,
+    		content$use,
+    		content$class,
+    		element,
+    		tab,
+    		instantiate,
+    		getInstance,
+    		tabIndicatorPromiseResolve,
+    		tabIndicatorPromise,
+    		getTabIndicatorInstancePromise,
+    		interactedHandler,
+    		activate,
+    		deactivate,
+    		focus,
+    		computeIndicatorClientRect,
+    		computeDimensions
+    	});
+
+    	$$self.$inject_state = $$new_props => {
+    		$$invalidate(12, $$props = assign(assign({}, $$props), $$new_props));
+    		if ("activeEntry" in $$props) activeEntry = $$new_props.activeEntry;
+    		if ("use" in $$props) $$invalidate(1, use = $$new_props.use);
+    		if ("className" in $$props) $$invalidate(2, className = $$new_props.className);
+    		if ("tabEntry" in $$props) $$invalidate(13, tabEntry = $$new_props.tabEntry);
+    		if ("ripple" in $$props) $$invalidate(3, ripple = $$new_props.ripple);
+    		if ("active" in $$props) $$invalidate(0, active = $$new_props.active);
+    		if ("stacked" in $$props) $$invalidate(4, stacked = $$new_props.stacked);
+    		if ("minWidth" in $$props) $$invalidate(5, minWidth = $$new_props.minWidth);
+    		if ("indicatorSpanOnlyContent" in $$props) $$invalidate(6, indicatorSpanOnlyContent = $$new_props.indicatorSpanOnlyContent);
+    		if ("focusOnActivate" in $$props) $$invalidate(14, focusOnActivate = $$new_props.focusOnActivate);
+    		if ("content$use" in $$props) $$invalidate(7, content$use = $$new_props.content$use);
+    		if ("content$class" in $$props) $$invalidate(8, content$class = $$new_props.content$class);
+    		if ("element" in $$props) $$invalidate(9, element = $$new_props.element);
+    		if ("tab" in $$props) $$invalidate(20, tab = $$new_props.tab);
+    		if ("instantiate" in $$props) instantiate = $$new_props.instantiate;
+    		if ("getInstance" in $$props) getInstance = $$new_props.getInstance;
+    		if ("tabIndicatorPromiseResolve" in $$props) tabIndicatorPromiseResolve = $$new_props.tabIndicatorPromiseResolve;
+    		if ("tabIndicatorPromise" in $$props) tabIndicatorPromise = $$new_props.tabIndicatorPromise;
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*tab, focusOnActivate*/ 1064960) {
+    			 if (tab) {
+    				$$invalidate(20, tab.focusOnActivate = focusOnActivate, tab);
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*tab, active*/ 1048577) {
+    			 if (tab && tab.active !== active) {
+    				$$invalidate(0, active = tab.active);
+    			}
+    		}
+    	};
+
+    	$$props = exclude_internal_props($$props);
+
+    	return [
+    		active,
+    		use,
+    		className,
+    		ripple,
+    		stacked,
+    		minWidth,
+    		indicatorSpanOnlyContent,
+    		content$use,
+    		content$class,
+    		element,
+    		forwardEvents,
+    		interactedHandler,
+    		$$props,
+    		tabEntry,
+    		focusOnActivate,
+    		activate,
+    		deactivate,
+    		focus,
+    		computeIndicatorClientRect,
+    		computeDimensions,
+    		tab,
+    		slots,
+    		button_binding,
+    		$$scope
+    	];
+    }
+
+    class Tab extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$D, create_fragment$D, safe_not_equal, {
+    			use: 1,
+    			class: 2,
+    			tab: 13,
+    			ripple: 3,
+    			active: 0,
+    			stacked: 4,
+    			minWidth: 5,
+    			indicatorSpanOnlyContent: 6,
+    			focusOnActivate: 14,
+    			content$use: 7,
+    			content$class: 8,
+    			activate: 15,
+    			deactivate: 16,
+    			focus: 17,
+    			computeIndicatorClientRect: 18,
+    			computeDimensions: 19
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Tab",
+    			options,
+    			id: create_fragment$D.name
+    		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || {};
+
+    		if (/*tabEntry*/ ctx[13] === undefined && !("tab" in props)) {
+    			console.warn("<Tab> was created without expected prop 'tab'");
+    		}
+    	}
+
+    	get use() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set use(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get class() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set class(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get tab() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set tab(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get ripple() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set ripple(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get active() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set active(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get stacked() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set stacked(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get minWidth() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set minWidth(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get indicatorSpanOnlyContent() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set indicatorSpanOnlyContent(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get focusOnActivate() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set focusOnActivate(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get content$use() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set content$use(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get content$class() {
+    		throw new Error_1$1("<Tab>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set content$class(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get activate() {
+    		return this.$$.ctx[15];
+    	}
+
+    	set activate(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get deactivate() {
+    		return this.$$.ctx[16];
+    	}
+
+    	set deactivate(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get focus() {
+    		return this.$$.ctx[17];
+    	}
+
+    	set focus(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get computeIndicatorClientRect() {
+    		return this.$$.ctx[18];
+    	}
+
+    	set computeIndicatorClientRect(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get computeDimensions() {
+    		return this.$$.ctx[19];
+    	}
+
+    	set computeDimensions(value) {
+    		throw new Error_1$1("<Tab>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules/@smui/common/Label.svelte generated by Svelte v3.31.0 */
+    const file$B = "node_modules/@smui/common/Label.svelte";
+
+    function create_fragment$E(ctx) {
+    	let span;
+    	let span_class_value;
+    	let useActions_action;
+    	let forwardEvents_action;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	const default_slot_template = /*#slots*/ ctx[6].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[5], null);
+
+    	let span_levels = [
+    		{
+    			class: span_class_value = "\n    " + /*className*/ ctx[1] + "\n    " + (/*context*/ ctx[3] === "button"
+    			? "mdc-button__label"
+    			: "") + "\n    " + (/*context*/ ctx[3] === "fab" ? "mdc-fab__label" : "") + "\n    " + (/*context*/ ctx[3] === "chip" ? "mdc-chip__text" : "") + "\n    " + (/*context*/ ctx[3] === "tab"
+    			? "mdc-tab__text-label"
+    			: "") + "\n    " + (/*context*/ ctx[3] === "image-list"
+    			? "mdc-image-list__label"
+    			: "") + "\n    " + (/*context*/ ctx[3] === "snackbar"
+    			? "mdc-snackbar__label"
+    			: "") + "\n  "
+    		},
+    		/*context*/ ctx[3] === "snackbar"
+    		? { role: "status", "aria-live": "polite" }
+    		: {},
+    		exclude(/*$$props*/ ctx[4], ["use", "class"])
+    	];
+
+    	let span_data = {};
+
+    	for (let i = 0; i < span_levels.length; i += 1) {
+    		span_data = assign(span_data, span_levels[i]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			span = element("span");
+    			if (default_slot) default_slot.c();
+    			set_attributes(span, span_data);
+    			add_location(span, file$B, 0, 0, 0);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, span, anchor);
+
+    			if (default_slot) {
+    				default_slot.m(span, null);
+    			}
+
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					action_destroyer(useActions_action = useActions.call(null, span, /*use*/ ctx[0])),
+    					action_destroyer(forwardEvents_action = /*forwardEvents*/ ctx[2].call(null, span))
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (default_slot) {
+    				if (default_slot.p && dirty & /*$$scope*/ 32) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[5], dirty, null, null);
+    				}
+    			}
+
+    			set_attributes(span, span_data = get_spread_update(span_levels, [
+    				(!current || dirty & /*className*/ 2 && span_class_value !== (span_class_value = "\n    " + /*className*/ ctx[1] + "\n    " + (/*context*/ ctx[3] === "button"
+    				? "mdc-button__label"
+    				: "") + "\n    " + (/*context*/ ctx[3] === "fab" ? "mdc-fab__label" : "") + "\n    " + (/*context*/ ctx[3] === "chip" ? "mdc-chip__text" : "") + "\n    " + (/*context*/ ctx[3] === "tab"
+    				? "mdc-tab__text-label"
+    				: "") + "\n    " + (/*context*/ ctx[3] === "image-list"
+    				? "mdc-image-list__label"
+    				: "") + "\n    " + (/*context*/ ctx[3] === "snackbar"
+    				? "mdc-snackbar__label"
+    				: "") + "\n  ")) && { class: span_class_value },
+    				/*context*/ ctx[3] === "snackbar"
+    				? { role: "status", "aria-live": "polite" }
+    				: {},
+    				dirty & /*$$props*/ 16 && exclude(/*$$props*/ ctx[4], ["use", "class"])
+    			]));
+
+    			if (useActions_action && is_function(useActions_action.update) && dirty & /*use*/ 1) useActions_action.update.call(null, /*use*/ ctx[0]);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(span);
+    			if (default_slot) default_slot.d(detaching);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$E.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$E($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("Label", slots, ['default']);
+    	const forwardEvents = forwardEventsBuilder(get_current_component());
+    	let { use = [] } = $$props;
+    	let { class: className = "" } = $$props;
+    	const context = getContext("SMUI:label:context");
+
+    	$$self.$$set = $$new_props => {
+    		$$invalidate(4, $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)));
+    		if ("use" in $$new_props) $$invalidate(0, use = $$new_props.use);
+    		if ("class" in $$new_props) $$invalidate(1, className = $$new_props.class);
+    		if ("$$scope" in $$new_props) $$invalidate(5, $$scope = $$new_props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		getContext,
+    		get_current_component,
+    		forwardEventsBuilder,
+    		exclude,
+    		useActions,
+    		forwardEvents,
+    		use,
+    		className,
+    		context
+    	});
+
+    	$$self.$inject_state = $$new_props => {
+    		$$invalidate(4, $$props = assign(assign({}, $$props), $$new_props));
+    		if ("use" in $$props) $$invalidate(0, use = $$new_props.use);
+    		if ("className" in $$props) $$invalidate(1, className = $$new_props.className);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$props = exclude_internal_props($$props);
+    	return [use, className, forwardEvents, context, $$props, $$scope, slots];
+    }
+
+    class Label extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$E, create_fragment$E, safe_not_equal, { use: 0, class: 1 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Label",
+    			options,
+    			id: create_fragment$E.name
+    		});
+    	}
+
+    	get use() {
+    		throw new Error("<Label>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set use(value) {
+    		throw new Error("<Label>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get class() {
+    		throw new Error("<Label>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set class(value) {
+    		throw new Error("<Label>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules/@smui/common/Icon.svelte generated by Svelte v3.31.0 */
+    const file$C = "node_modules/@smui/common/Icon.svelte";
+
+    function create_fragment$F(ctx) {
+    	let i;
+    	let i_class_value;
+    	let useActions_action;
+    	let forwardEvents_action;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	const default_slot_template = /*#slots*/ ctx[10].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[9], null);
+
+    	let i_levels = [
+    		{
+    			class: i_class_value = "\n    " + /*className*/ ctx[1] + "\n    " + (/*context*/ ctx[7] === "button"
+    			? "mdc-button__icon"
+    			: "") + "\n    " + (/*context*/ ctx[7] === "fab" ? "mdc-fab__icon" : "") + "\n    " + (/*context*/ ctx[7] === "icon-button"
+    			? "mdc-icon-button__icon"
+    			: "") + "\n    " + (/*context*/ ctx[7] === "icon-button" && /*on*/ ctx[2]
+    			? "mdc-icon-button__icon--on"
+    			: "") + "\n    " + (/*context*/ ctx[7] === "chip" ? "mdc-chip__icon" : "") + "\n    " + (/*context*/ ctx[7] === "chip" && /*leading*/ ctx[3]
+    			? "mdc-chip__icon--leading"
+    			: "") + "\n    " + (/*context*/ ctx[7] === "chip" && /*leadingHidden*/ ctx[4]
+    			? "mdc-chip__icon--leading-hidden"
+    			: "") + "\n    " + (/*context*/ ctx[7] === "chip" && /*trailing*/ ctx[5]
+    			? "mdc-chip__icon--trailing"
+    			: "") + "\n    " + (/*context*/ ctx[7] === "tab" ? "mdc-tab__icon" : "") + "\n  "
+    		},
+    		{ "aria-hidden": "true" },
+    		exclude(/*$$props*/ ctx[8], ["use", "class", "on", "leading", "leadingHidden", "trailing"])
+    	];
+
+    	let i_data = {};
+
+    	for (let i = 0; i < i_levels.length; i += 1) {
+    		i_data = assign(i_data, i_levels[i]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			i = element("i");
+    			if (default_slot) default_slot.c();
+    			set_attributes(i, i_data);
+    			add_location(i, file$C, 0, 0, 0);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, i, anchor);
+
+    			if (default_slot) {
+    				default_slot.m(i, null);
+    			}
+
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					action_destroyer(useActions_action = useActions.call(null, i, /*use*/ ctx[0])),
+    					action_destroyer(forwardEvents_action = /*forwardEvents*/ ctx[6].call(null, i))
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (default_slot) {
+    				if (default_slot.p && dirty & /*$$scope*/ 512) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[9], dirty, null, null);
+    				}
+    			}
+
+    			set_attributes(i, i_data = get_spread_update(i_levels, [
+    				(!current || dirty & /*className, on, leading, leadingHidden, trailing*/ 62 && i_class_value !== (i_class_value = "\n    " + /*className*/ ctx[1] + "\n    " + (/*context*/ ctx[7] === "button"
+    				? "mdc-button__icon"
+    				: "") + "\n    " + (/*context*/ ctx[7] === "fab" ? "mdc-fab__icon" : "") + "\n    " + (/*context*/ ctx[7] === "icon-button"
+    				? "mdc-icon-button__icon"
+    				: "") + "\n    " + (/*context*/ ctx[7] === "icon-button" && /*on*/ ctx[2]
+    				? "mdc-icon-button__icon--on"
+    				: "") + "\n    " + (/*context*/ ctx[7] === "chip" ? "mdc-chip__icon" : "") + "\n    " + (/*context*/ ctx[7] === "chip" && /*leading*/ ctx[3]
+    				? "mdc-chip__icon--leading"
+    				: "") + "\n    " + (/*context*/ ctx[7] === "chip" && /*leadingHidden*/ ctx[4]
+    				? "mdc-chip__icon--leading-hidden"
+    				: "") + "\n    " + (/*context*/ ctx[7] === "chip" && /*trailing*/ ctx[5]
+    				? "mdc-chip__icon--trailing"
+    				: "") + "\n    " + (/*context*/ ctx[7] === "tab" ? "mdc-tab__icon" : "") + "\n  ")) && { class: i_class_value },
+    				{ "aria-hidden": "true" },
+    				dirty & /*$$props*/ 256 && exclude(/*$$props*/ ctx[8], ["use", "class", "on", "leading", "leadingHidden", "trailing"])
+    			]));
+
+    			if (useActions_action && is_function(useActions_action.update) && dirty & /*use*/ 1) useActions_action.update.call(null, /*use*/ ctx[0]);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(i);
+    			if (default_slot) default_slot.d(detaching);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$F.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$F($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("Icon", slots, ['default']);
+    	const forwardEvents = forwardEventsBuilder(get_current_component());
+    	let { use = [] } = $$props;
+    	let { class: className = "" } = $$props;
+    	let { on = false } = $$props;
+    	let { leading = false } = $$props;
+    	let { leadingHidden = false } = $$props;
+    	let { trailing = false } = $$props;
+    	const context = getContext("SMUI:icon:context");
+
+    	$$self.$$set = $$new_props => {
+    		$$invalidate(8, $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)));
+    		if ("use" in $$new_props) $$invalidate(0, use = $$new_props.use);
+    		if ("class" in $$new_props) $$invalidate(1, className = $$new_props.class);
+    		if ("on" in $$new_props) $$invalidate(2, on = $$new_props.on);
+    		if ("leading" in $$new_props) $$invalidate(3, leading = $$new_props.leading);
+    		if ("leadingHidden" in $$new_props) $$invalidate(4, leadingHidden = $$new_props.leadingHidden);
+    		if ("trailing" in $$new_props) $$invalidate(5, trailing = $$new_props.trailing);
+    		if ("$$scope" in $$new_props) $$invalidate(9, $$scope = $$new_props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		getContext,
+    		get_current_component,
+    		forwardEventsBuilder,
+    		exclude,
+    		useActions,
+    		forwardEvents,
+    		use,
+    		className,
+    		on,
+    		leading,
+    		leadingHidden,
+    		trailing,
+    		context
+    	});
+
+    	$$self.$inject_state = $$new_props => {
+    		$$invalidate(8, $$props = assign(assign({}, $$props), $$new_props));
+    		if ("use" in $$props) $$invalidate(0, use = $$new_props.use);
+    		if ("className" in $$props) $$invalidate(1, className = $$new_props.className);
+    		if ("on" in $$props) $$invalidate(2, on = $$new_props.on);
+    		if ("leading" in $$props) $$invalidate(3, leading = $$new_props.leading);
+    		if ("leadingHidden" in $$props) $$invalidate(4, leadingHidden = $$new_props.leadingHidden);
+    		if ("trailing" in $$props) $$invalidate(5, trailing = $$new_props.trailing);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$props = exclude_internal_props($$props);
+
+    	return [
+    		use,
+    		className,
+    		on,
+    		leading,
+    		leadingHidden,
+    		trailing,
+    		forwardEvents,
+    		context,
+    		$$props,
+    		$$scope,
+    		slots
+    	];
+    }
+
+    class Icon extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$F, create_fragment$F, safe_not_equal, {
+    			use: 0,
+    			class: 1,
+    			on: 2,
+    			leading: 3,
+    			leadingHidden: 4,
+    			trailing: 5
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Icon",
+    			options,
+    			id: create_fragment$F.name
+    		});
+    	}
+
+    	get use() {
+    		throw new Error("<Icon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set use(value) {
+    		throw new Error("<Icon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get class() {
+    		throw new Error("<Icon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set class(value) {
+    		throw new Error("<Icon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get on() {
+    		throw new Error("<Icon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set on(value) {
+    		throw new Error("<Icon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get leading() {
+    		throw new Error("<Icon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set leading(value) {
+    		throw new Error("<Icon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get leadingHidden() {
+    		throw new Error("<Icon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set leadingHidden(value) {
+    		throw new Error("<Icon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get trailing() {
+    		throw new Error("<Icon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set trailing(value) {
+    		throw new Error("<Icon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var cssClasses$4 = {
+        ANIMATING: 'mdc-tab-scroller--animating',
+        SCROLL_AREA_SCROLL: 'mdc-tab-scroller__scroll-area--scroll',
+        SCROLL_TEST: 'mdc-tab-scroller__test',
+    };
+    var strings$4 = {
+        AREA_SELECTOR: '.mdc-tab-scroller__scroll-area',
+        CONTENT_SELECTOR: '.mdc-tab-scroller__scroll-content',
+    };
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabScrollerRTL = /** @class */ (function () {
+        function MDCTabScrollerRTL(adapter) {
+            this.adapter_ = adapter;
+        }
+        return MDCTabScrollerRTL;
+    }());
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabScrollerRTLDefault = /** @class */ (function (_super) {
+        __extends(MDCTabScrollerRTLDefault, _super);
+        function MDCTabScrollerRTLDefault() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCTabScrollerRTLDefault.prototype.getScrollPositionRTL = function () {
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            var right = this.calculateScrollEdges_().right;
+            // Scroll values on most browsers are ints instead of floats so we round
+            return Math.round(right - currentScrollLeft);
+        };
+        MDCTabScrollerRTLDefault.prototype.scrollToRTL = function (scrollX) {
+            var edges = this.calculateScrollEdges_();
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            var clampedScrollLeft = this.clampScrollValue_(edges.right - scrollX);
+            return {
+                finalScrollPosition: clampedScrollLeft,
+                scrollDelta: clampedScrollLeft - currentScrollLeft,
+            };
+        };
+        MDCTabScrollerRTLDefault.prototype.incrementScrollRTL = function (scrollX) {
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            var clampedScrollLeft = this.clampScrollValue_(currentScrollLeft - scrollX);
+            return {
+                finalScrollPosition: clampedScrollLeft,
+                scrollDelta: clampedScrollLeft - currentScrollLeft,
+            };
+        };
+        MDCTabScrollerRTLDefault.prototype.getAnimatingScrollPosition = function (scrollX) {
+            return scrollX;
+        };
+        MDCTabScrollerRTLDefault.prototype.calculateScrollEdges_ = function () {
+            var contentWidth = this.adapter_.getScrollContentOffsetWidth();
+            var rootWidth = this.adapter_.getScrollAreaOffsetWidth();
+            return {
+                left: 0,
+                right: contentWidth - rootWidth,
+            };
+        };
+        MDCTabScrollerRTLDefault.prototype.clampScrollValue_ = function (scrollX) {
+            var edges = this.calculateScrollEdges_();
+            return Math.min(Math.max(edges.left, scrollX), edges.right);
+        };
+        return MDCTabScrollerRTLDefault;
+    }(MDCTabScrollerRTL));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabScrollerRTLNegative = /** @class */ (function (_super) {
+        __extends(MDCTabScrollerRTLNegative, _super);
+        function MDCTabScrollerRTLNegative() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCTabScrollerRTLNegative.prototype.getScrollPositionRTL = function (translateX) {
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            return Math.round(translateX - currentScrollLeft);
+        };
+        MDCTabScrollerRTLNegative.prototype.scrollToRTL = function (scrollX) {
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            var clampedScrollLeft = this.clampScrollValue_(-scrollX);
+            return {
+                finalScrollPosition: clampedScrollLeft,
+                scrollDelta: clampedScrollLeft - currentScrollLeft,
+            };
+        };
+        MDCTabScrollerRTLNegative.prototype.incrementScrollRTL = function (scrollX) {
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            var clampedScrollLeft = this.clampScrollValue_(currentScrollLeft - scrollX);
+            return {
+                finalScrollPosition: clampedScrollLeft,
+                scrollDelta: clampedScrollLeft - currentScrollLeft,
+            };
+        };
+        MDCTabScrollerRTLNegative.prototype.getAnimatingScrollPosition = function (scrollX, translateX) {
+            return scrollX - translateX;
+        };
+        MDCTabScrollerRTLNegative.prototype.calculateScrollEdges_ = function () {
+            var contentWidth = this.adapter_.getScrollContentOffsetWidth();
+            var rootWidth = this.adapter_.getScrollAreaOffsetWidth();
+            return {
+                left: rootWidth - contentWidth,
+                right: 0,
+            };
+        };
+        MDCTabScrollerRTLNegative.prototype.clampScrollValue_ = function (scrollX) {
+            var edges = this.calculateScrollEdges_();
+            return Math.max(Math.min(edges.right, scrollX), edges.left);
+        };
+        return MDCTabScrollerRTLNegative;
+    }(MDCTabScrollerRTL));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabScrollerRTLReverse = /** @class */ (function (_super) {
+        __extends(MDCTabScrollerRTLReverse, _super);
+        function MDCTabScrollerRTLReverse() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCTabScrollerRTLReverse.prototype.getScrollPositionRTL = function (translateX) {
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            // Scroll values on most browsers are ints instead of floats so we round
+            return Math.round(currentScrollLeft - translateX);
+        };
+        MDCTabScrollerRTLReverse.prototype.scrollToRTL = function (scrollX) {
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            var clampedScrollLeft = this.clampScrollValue_(scrollX);
+            return {
+                finalScrollPosition: clampedScrollLeft,
+                scrollDelta: currentScrollLeft - clampedScrollLeft,
+            };
+        };
+        MDCTabScrollerRTLReverse.prototype.incrementScrollRTL = function (scrollX) {
+            var currentScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            var clampedScrollLeft = this.clampScrollValue_(currentScrollLeft + scrollX);
+            return {
+                finalScrollPosition: clampedScrollLeft,
+                scrollDelta: currentScrollLeft - clampedScrollLeft,
+            };
+        };
+        MDCTabScrollerRTLReverse.prototype.getAnimatingScrollPosition = function (scrollX, translateX) {
+            return scrollX + translateX;
+        };
+        MDCTabScrollerRTLReverse.prototype.calculateScrollEdges_ = function () {
+            var contentWidth = this.adapter_.getScrollContentOffsetWidth();
+            var rootWidth = this.adapter_.getScrollAreaOffsetWidth();
+            return {
+                left: contentWidth - rootWidth,
+                right: 0,
+            };
+        };
+        MDCTabScrollerRTLReverse.prototype.clampScrollValue_ = function (scrollX) {
+            var edges = this.calculateScrollEdges_();
+            return Math.min(Math.max(edges.right, scrollX), edges.left);
+        };
+        return MDCTabScrollerRTLReverse;
+    }(MDCTabScrollerRTL));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabScrollerFoundation = /** @class */ (function (_super) {
+        __extends(MDCTabScrollerFoundation, _super);
+        function MDCTabScrollerFoundation(adapter) {
+            var _this = _super.call(this, __assign({}, MDCTabScrollerFoundation.defaultAdapter, adapter)) || this;
+            /**
+             * Controls whether we should handle the transitionend and interaction events during the animation.
+             */
+            _this.isAnimating_ = false;
+            return _this;
+        }
+        Object.defineProperty(MDCTabScrollerFoundation, "cssClasses", {
+            get: function () {
+                return cssClasses$4;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabScrollerFoundation, "strings", {
+            get: function () {
+                return strings$4;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabScrollerFoundation, "defaultAdapter", {
+            get: function () {
+                // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+                return {
+                    eventTargetMatchesSelector: function () { return false; },
+                    addClass: function () { return undefined; },
+                    removeClass: function () { return undefined; },
+                    addScrollAreaClass: function () { return undefined; },
+                    setScrollAreaStyleProperty: function () { return undefined; },
+                    setScrollContentStyleProperty: function () { return undefined; },
+                    getScrollContentStyleValue: function () { return ''; },
+                    setScrollAreaScrollLeft: function () { return undefined; },
+                    getScrollAreaScrollLeft: function () { return 0; },
+                    getScrollContentOffsetWidth: function () { return 0; },
+                    getScrollAreaOffsetWidth: function () { return 0; },
+                    computeScrollAreaClientRect: function () { return ({ top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0 }); },
+                    computeScrollContentClientRect: function () { return ({ top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0 }); },
+                    computeHorizontalScrollbarHeight: function () { return 0; },
+                };
+                // tslint:enable:object-literal-sort-keys
+            },
+            enumerable: true,
+            configurable: true
+        });
+        MDCTabScrollerFoundation.prototype.init = function () {
+            // Compute horizontal scrollbar height on scroller with overflow initially hidden, then update overflow to scroll
+            // and immediately adjust bottom margin to avoid the scrollbar initially appearing before JS runs.
+            var horizontalScrollbarHeight = this.adapter_.computeHorizontalScrollbarHeight();
+            this.adapter_.setScrollAreaStyleProperty('margin-bottom', -horizontalScrollbarHeight + 'px');
+            this.adapter_.addScrollAreaClass(MDCTabScrollerFoundation.cssClasses.SCROLL_AREA_SCROLL);
+        };
+        /**
+         * Computes the current visual scroll position
+         */
+        MDCTabScrollerFoundation.prototype.getScrollPosition = function () {
+            if (this.isRTL_()) {
+                return this.computeCurrentScrollPositionRTL_();
+            }
+            var currentTranslateX = this.calculateCurrentTranslateX_();
+            var scrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            return scrollLeft - currentTranslateX;
+        };
+        /**
+         * Handles interaction events that occur during transition
+         */
+        MDCTabScrollerFoundation.prototype.handleInteraction = function () {
+            // Early exit if we aren't animating
+            if (!this.isAnimating_) {
+                return;
+            }
+            // Prevent other event listeners from handling this event
+            this.stopScrollAnimation_();
+        };
+        /**
+         * Handles the transitionend event
+         */
+        MDCTabScrollerFoundation.prototype.handleTransitionEnd = function (evt) {
+            // Early exit if we aren't animating or the event was triggered by a different element.
+            var evtTarget = evt.target;
+            if (!this.isAnimating_ ||
+                !this.adapter_.eventTargetMatchesSelector(evtTarget, MDCTabScrollerFoundation.strings.CONTENT_SELECTOR)) {
+                return;
+            }
+            this.isAnimating_ = false;
+            this.adapter_.removeClass(MDCTabScrollerFoundation.cssClasses.ANIMATING);
+        };
+        /**
+         * Increment the scroll value by the scrollXIncrement
+         * @param scrollXIncrement The value by which to increment the scroll position
+         */
+        MDCTabScrollerFoundation.prototype.incrementScroll = function (scrollXIncrement) {
+            // Early exit for non-operational increment values
+            if (scrollXIncrement === 0) {
+                return;
+            }
+            if (this.isRTL_()) {
+                return this.incrementScrollRTL_(scrollXIncrement);
+            }
+            this.incrementScroll_(scrollXIncrement);
+        };
+        /**
+         * Scrolls to the given scrollX value
+         */
+        MDCTabScrollerFoundation.prototype.scrollTo = function (scrollX) {
+            if (this.isRTL_()) {
+                return this.scrollToRTL_(scrollX);
+            }
+            this.scrollTo_(scrollX);
+        };
+        /**
+         * @return Browser-specific {@link MDCTabScrollerRTL} instance.
+         */
+        MDCTabScrollerFoundation.prototype.getRTLScroller = function () {
+            if (!this.rtlScrollerInstance_) {
+                this.rtlScrollerInstance_ = this.rtlScrollerFactory_();
+            }
+            return this.rtlScrollerInstance_;
+        };
+        /**
+         * @return translateX value from a CSS matrix transform function string.
+         */
+        MDCTabScrollerFoundation.prototype.calculateCurrentTranslateX_ = function () {
+            var transformValue = this.adapter_.getScrollContentStyleValue('transform');
+            // Early exit if no transform is present
+            if (transformValue === 'none') {
+                return 0;
+            }
+            // The transform value comes back as a matrix transformation in the form
+            // of `matrix(a, b, c, d, tx, ty)`. We only care about tx (translateX) so
+            // we're going to grab all the parenthesized values, strip out tx, and
+            // parse it.
+            var match = /\((.+?)\)/.exec(transformValue);
+            if (!match) {
+                return 0;
+            }
+            var matrixParams = match[1];
+            // tslint:disable-next-line:ban-ts-ignore "Unused vars" should be a linter warning, not a compiler error.
+            // @ts-ignore These unused variables should retain their semantic names for clarity.
+            var _a = __read(matrixParams.split(','), 6), a = _a[0], b = _a[1], c = _a[2], d = _a[3], tx = _a[4], ty = _a[5];
+            return parseFloat(tx); // tslint:disable-line:ban
+        };
+        /**
+         * Calculates a safe scroll value that is > 0 and < the max scroll value
+         * @param scrollX The distance to scroll
+         */
+        MDCTabScrollerFoundation.prototype.clampScrollValue_ = function (scrollX) {
+            var edges = this.calculateScrollEdges_();
+            return Math.min(Math.max(edges.left, scrollX), edges.right);
+        };
+        MDCTabScrollerFoundation.prototype.computeCurrentScrollPositionRTL_ = function () {
+            var translateX = this.calculateCurrentTranslateX_();
+            return this.getRTLScroller().getScrollPositionRTL(translateX);
+        };
+        MDCTabScrollerFoundation.prototype.calculateScrollEdges_ = function () {
+            var contentWidth = this.adapter_.getScrollContentOffsetWidth();
+            var rootWidth = this.adapter_.getScrollAreaOffsetWidth();
+            return {
+                left: 0,
+                right: contentWidth - rootWidth,
+            };
+        };
+        /**
+         * Internal scroll method
+         * @param scrollX The new scroll position
+         */
+        MDCTabScrollerFoundation.prototype.scrollTo_ = function (scrollX) {
+            var currentScrollX = this.getScrollPosition();
+            var safeScrollX = this.clampScrollValue_(scrollX);
+            var scrollDelta = safeScrollX - currentScrollX;
+            this.animate_({
+                finalScrollPosition: safeScrollX,
+                scrollDelta: scrollDelta,
+            });
+        };
+        /**
+         * Internal RTL scroll method
+         * @param scrollX The new scroll position
+         */
+        MDCTabScrollerFoundation.prototype.scrollToRTL_ = function (scrollX) {
+            var animation = this.getRTLScroller().scrollToRTL(scrollX);
+            this.animate_(animation);
+        };
+        /**
+         * Internal increment scroll method
+         * @param scrollX The new scroll position increment
+         */
+        MDCTabScrollerFoundation.prototype.incrementScroll_ = function (scrollX) {
+            var currentScrollX = this.getScrollPosition();
+            var targetScrollX = scrollX + currentScrollX;
+            var safeScrollX = this.clampScrollValue_(targetScrollX);
+            var scrollDelta = safeScrollX - currentScrollX;
+            this.animate_({
+                finalScrollPosition: safeScrollX,
+                scrollDelta: scrollDelta,
+            });
+        };
+        /**
+         * Internal increment scroll RTL method
+         * @param scrollX The new scroll position RTL increment
+         */
+        MDCTabScrollerFoundation.prototype.incrementScrollRTL_ = function (scrollX) {
+            var animation = this.getRTLScroller().incrementScrollRTL(scrollX);
+            this.animate_(animation);
+        };
+        /**
+         * Animates the tab scrolling
+         * @param animation The animation to apply
+         */
+        MDCTabScrollerFoundation.prototype.animate_ = function (animation) {
+            var _this = this;
+            // Early exit if translateX is 0, which means there's no animation to perform
+            if (animation.scrollDelta === 0) {
+                return;
+            }
+            this.stopScrollAnimation_();
+            // This animation uses the FLIP approach.
+            // Read more here: https://aerotwist.com/blog/flip-your-animations/
+            this.adapter_.setScrollAreaScrollLeft(animation.finalScrollPosition);
+            this.adapter_.setScrollContentStyleProperty('transform', "translateX(" + animation.scrollDelta + "px)");
+            // Force repaint
+            this.adapter_.computeScrollAreaClientRect();
+            requestAnimationFrame(function () {
+                _this.adapter_.addClass(MDCTabScrollerFoundation.cssClasses.ANIMATING);
+                _this.adapter_.setScrollContentStyleProperty('transform', 'none');
+            });
+            this.isAnimating_ = true;
+        };
+        /**
+         * Stops scroll animation
+         */
+        MDCTabScrollerFoundation.prototype.stopScrollAnimation_ = function () {
+            this.isAnimating_ = false;
+            var currentScrollPosition = this.getAnimatingScrollPosition_();
+            this.adapter_.removeClass(MDCTabScrollerFoundation.cssClasses.ANIMATING);
+            this.adapter_.setScrollContentStyleProperty('transform', 'translateX(0px)');
+            this.adapter_.setScrollAreaScrollLeft(currentScrollPosition);
+        };
+        /**
+         * Gets the current scroll position during animation
+         */
+        MDCTabScrollerFoundation.prototype.getAnimatingScrollPosition_ = function () {
+            var currentTranslateX = this.calculateCurrentTranslateX_();
+            var scrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            if (this.isRTL_()) {
+                return this.getRTLScroller().getAnimatingScrollPosition(scrollLeft, currentTranslateX);
+            }
+            return scrollLeft - currentTranslateX;
+        };
+        /**
+         * Determines the RTL Scroller to use
+         */
+        MDCTabScrollerFoundation.prototype.rtlScrollerFactory_ = function () {
+            // Browsers have three different implementations of scrollLeft in RTL mode,
+            // dependent on the browser. The behavior is based off the max LTR
+            // scrollLeft value and 0.
+            //
+            // * Default scrolling in RTL *
+            //    - Left-most value: 0
+            //    - Right-most value: Max LTR scrollLeft value
+            //
+            // * Negative scrolling in RTL *
+            //    - Left-most value: Negated max LTR scrollLeft value
+            //    - Right-most value: 0
+            //
+            // * Reverse scrolling in RTL *
+            //    - Left-most value: Max LTR scrollLeft value
+            //    - Right-most value: 0
+            //
+            // We use those principles below to determine which RTL scrollLeft
+            // behavior is implemented in the current browser.
+            var initialScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            this.adapter_.setScrollAreaScrollLeft(initialScrollLeft - 1);
+            var newScrollLeft = this.adapter_.getScrollAreaScrollLeft();
+            // If the newScrollLeft value is negative,then we know that the browser has
+            // implemented negative RTL scrolling, since all other implementations have
+            // only positive values.
+            if (newScrollLeft < 0) {
+                // Undo the scrollLeft test check
+                this.adapter_.setScrollAreaScrollLeft(initialScrollLeft);
+                return new MDCTabScrollerRTLNegative(this.adapter_);
+            }
+            var rootClientRect = this.adapter_.computeScrollAreaClientRect();
+            var contentClientRect = this.adapter_.computeScrollContentClientRect();
+            var rightEdgeDelta = Math.round(contentClientRect.right - rootClientRect.right);
+            // Undo the scrollLeft test check
+            this.adapter_.setScrollAreaScrollLeft(initialScrollLeft);
+            // By calculating the clientRect of the root element and the clientRect of
+            // the content element, we can determine how much the scroll value changed
+            // when we performed the scrollLeft subtraction above.
+            if (rightEdgeDelta === newScrollLeft) {
+                return new MDCTabScrollerRTLReverse(this.adapter_);
+            }
+            return new MDCTabScrollerRTLDefault(this.adapter_);
+        };
+        MDCTabScrollerFoundation.prototype.isRTL_ = function () {
+            return this.adapter_.getScrollContentStyleValue('direction') === 'rtl';
+        };
+        return MDCTabScrollerFoundation;
+    }(MDCFoundation));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    /**
+     * Stores result from computeHorizontalScrollbarHeight to avoid redundant processing.
+     */
+    var horizontalScrollbarHeight_;
+    /**
+     * Computes the height of browser-rendered horizontal scrollbars using a self-created test element.
+     * May return 0 (e.g. on OS X browsers under default configuration).
+     */
+    function computeHorizontalScrollbarHeight(documentObj, shouldCacheResult) {
+        if (shouldCacheResult === void 0) { shouldCacheResult = true; }
+        if (shouldCacheResult && typeof horizontalScrollbarHeight_ !== 'undefined') {
+            return horizontalScrollbarHeight_;
+        }
+        var el = documentObj.createElement('div');
+        el.classList.add(cssClasses$4.SCROLL_TEST);
+        documentObj.body.appendChild(el);
+        var horizontalScrollbarHeight = el.offsetHeight - el.clientHeight;
+        documentObj.body.removeChild(el);
+        if (shouldCacheResult) {
+            horizontalScrollbarHeight_ = horizontalScrollbarHeight;
+        }
+        return horizontalScrollbarHeight;
+    }
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var MDCTabScroller = /** @class */ (function (_super) {
+        __extends(MDCTabScroller, _super);
+        function MDCTabScroller() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCTabScroller.attachTo = function (root) {
+            return new MDCTabScroller(root);
+        };
+        MDCTabScroller.prototype.initialize = function () {
+            this.area_ = this.root_.querySelector(MDCTabScrollerFoundation.strings.AREA_SELECTOR);
+            this.content_ = this.root_.querySelector(MDCTabScrollerFoundation.strings.CONTENT_SELECTOR);
+        };
+        MDCTabScroller.prototype.initialSyncWithDOM = function () {
+            var _this = this;
+            this.handleInteraction_ = function () { return _this.foundation_.handleInteraction(); };
+            this.handleTransitionEnd_ = function (evt) { return _this.foundation_.handleTransitionEnd(evt); };
+            this.area_.addEventListener('wheel', this.handleInteraction_, applyPassive());
+            this.area_.addEventListener('touchstart', this.handleInteraction_, applyPassive());
+            this.area_.addEventListener('pointerdown', this.handleInteraction_, applyPassive());
+            this.area_.addEventListener('mousedown', this.handleInteraction_, applyPassive());
+            this.area_.addEventListener('keydown', this.handleInteraction_, applyPassive());
+            this.content_.addEventListener('transitionend', this.handleTransitionEnd_);
+        };
+        MDCTabScroller.prototype.destroy = function () {
+            _super.prototype.destroy.call(this);
+            this.area_.removeEventListener('wheel', this.handleInteraction_, applyPassive());
+            this.area_.removeEventListener('touchstart', this.handleInteraction_, applyPassive());
+            this.area_.removeEventListener('pointerdown', this.handleInteraction_, applyPassive());
+            this.area_.removeEventListener('mousedown', this.handleInteraction_, applyPassive());
+            this.area_.removeEventListener('keydown', this.handleInteraction_, applyPassive());
+            this.content_.removeEventListener('transitionend', this.handleTransitionEnd_);
+        };
+        MDCTabScroller.prototype.getDefaultFoundation = function () {
+            var _this = this;
+            // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
+            // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+            // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+            var adapter = {
+                eventTargetMatchesSelector: function (evtTarget, selector) { return matches(evtTarget, selector); },
+                addClass: function (className) { return _this.root_.classList.add(className); },
+                removeClass: function (className) { return _this.root_.classList.remove(className); },
+                addScrollAreaClass: function (className) { return _this.area_.classList.add(className); },
+                setScrollAreaStyleProperty: function (prop, value) { return _this.area_.style.setProperty(prop, value); },
+                setScrollContentStyleProperty: function (prop, value) { return _this.content_.style.setProperty(prop, value); },
+                getScrollContentStyleValue: function (propName) { return window.getComputedStyle(_this.content_).getPropertyValue(propName); },
+                setScrollAreaScrollLeft: function (scrollX) { return _this.area_.scrollLeft = scrollX; },
+                getScrollAreaScrollLeft: function () { return _this.area_.scrollLeft; },
+                getScrollContentOffsetWidth: function () { return _this.content_.offsetWidth; },
+                getScrollAreaOffsetWidth: function () { return _this.area_.offsetWidth; },
+                computeScrollAreaClientRect: function () { return _this.area_.getBoundingClientRect(); },
+                computeScrollContentClientRect: function () { return _this.content_.getBoundingClientRect(); },
+                computeHorizontalScrollbarHeight: function () { return computeHorizontalScrollbarHeight(document); },
+            };
+            // tslint:enable:object-literal-sort-keys
+            return new MDCTabScrollerFoundation(adapter);
+        };
+        /**
+         * Returns the current visual scroll position
+         */
+        MDCTabScroller.prototype.getScrollPosition = function () {
+            return this.foundation_.getScrollPosition();
+        };
+        /**
+         * Returns the width of the scroll content
+         */
+        MDCTabScroller.prototype.getScrollContentWidth = function () {
+            return this.content_.offsetWidth;
+        };
+        /**
+         * Increments the scroll value by the given amount
+         * @param scrollXIncrement The pixel value by which to increment the scroll value
+         */
+        MDCTabScroller.prototype.incrementScroll = function (scrollXIncrement) {
+            this.foundation_.incrementScroll(scrollXIncrement);
+        };
+        /**
+         * Scrolls to the given pixel position
+         * @param scrollX The pixel value to scroll to
+         */
+        MDCTabScroller.prototype.scrollTo = function (scrollX) {
+            this.foundation_.scrollTo(scrollX);
+        };
+        return MDCTabScroller;
+    }(MDCComponent));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var strings$5 = {
+        ARROW_LEFT_KEY: 'ArrowLeft',
+        ARROW_RIGHT_KEY: 'ArrowRight',
+        END_KEY: 'End',
+        ENTER_KEY: 'Enter',
+        HOME_KEY: 'Home',
+        SPACE_KEY: 'Space',
+        TAB_ACTIVATED_EVENT: 'MDCTabBar:activated',
+        TAB_SCROLLER_SELECTOR: '.mdc-tab-scroller',
+        TAB_SELECTOR: '.mdc-tab',
+    };
+    var numbers$2 = {
+        ARROW_LEFT_KEYCODE: 37,
+        ARROW_RIGHT_KEYCODE: 39,
+        END_KEYCODE: 35,
+        ENTER_KEYCODE: 13,
+        EXTRA_SCROLL_AMOUNT: 20,
+        HOME_KEYCODE: 36,
+        SPACE_KEYCODE: 32,
+    };
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var ACCEPTABLE_KEYS = new Set();
+    // IE11 has no support for new Set with iterable so we need to initialize this by hand
+    ACCEPTABLE_KEYS.add(strings$5.ARROW_LEFT_KEY);
+    ACCEPTABLE_KEYS.add(strings$5.ARROW_RIGHT_KEY);
+    ACCEPTABLE_KEYS.add(strings$5.END_KEY);
+    ACCEPTABLE_KEYS.add(strings$5.HOME_KEY);
+    ACCEPTABLE_KEYS.add(strings$5.ENTER_KEY);
+    ACCEPTABLE_KEYS.add(strings$5.SPACE_KEY);
+    var KEYCODE_MAP = new Map();
+    // IE11 has no support for new Map with iterable so we need to initialize this by hand
+    KEYCODE_MAP.set(numbers$2.ARROW_LEFT_KEYCODE, strings$5.ARROW_LEFT_KEY);
+    KEYCODE_MAP.set(numbers$2.ARROW_RIGHT_KEYCODE, strings$5.ARROW_RIGHT_KEY);
+    KEYCODE_MAP.set(numbers$2.END_KEYCODE, strings$5.END_KEY);
+    KEYCODE_MAP.set(numbers$2.HOME_KEYCODE, strings$5.HOME_KEY);
+    KEYCODE_MAP.set(numbers$2.ENTER_KEYCODE, strings$5.ENTER_KEY);
+    KEYCODE_MAP.set(numbers$2.SPACE_KEYCODE, strings$5.SPACE_KEY);
+    var MDCTabBarFoundation = /** @class */ (function (_super) {
+        __extends(MDCTabBarFoundation, _super);
+        function MDCTabBarFoundation(adapter) {
+            var _this = _super.call(this, __assign({}, MDCTabBarFoundation.defaultAdapter, adapter)) || this;
+            _this.useAutomaticActivation_ = false;
+            return _this;
+        }
+        Object.defineProperty(MDCTabBarFoundation, "strings", {
+            get: function () {
+                return strings$5;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabBarFoundation, "numbers", {
+            get: function () {
+                return numbers$2;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabBarFoundation, "defaultAdapter", {
+            get: function () {
+                // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+                return {
+                    scrollTo: function () { return undefined; },
+                    incrementScroll: function () { return undefined; },
+                    getScrollPosition: function () { return 0; },
+                    getScrollContentWidth: function () { return 0; },
+                    getOffsetWidth: function () { return 0; },
+                    isRTL: function () { return false; },
+                    setActiveTab: function () { return undefined; },
+                    activateTabAtIndex: function () { return undefined; },
+                    deactivateTabAtIndex: function () { return undefined; },
+                    focusTabAtIndex: function () { return undefined; },
+                    getTabIndicatorClientRectAtIndex: function () { return ({ top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0 }); },
+                    getTabDimensionsAtIndex: function () { return ({ rootLeft: 0, rootRight: 0, contentLeft: 0, contentRight: 0 }); },
+                    getPreviousActiveTabIndex: function () { return -1; },
+                    getFocusedTabIndex: function () { return -1; },
+                    getIndexOfTabById: function () { return -1; },
+                    getTabListLength: function () { return 0; },
+                    notifyTabActivated: function () { return undefined; },
+                };
+                // tslint:enable:object-literal-sort-keys
+            },
+            enumerable: true,
+            configurable: true
+        });
+        /**
+         * Switches between automatic and manual activation modes.
+         * See https://www.w3.org/TR/wai-aria-practices/#tabpanel for examples.
+         */
+        MDCTabBarFoundation.prototype.setUseAutomaticActivation = function (useAutomaticActivation) {
+            this.useAutomaticActivation_ = useAutomaticActivation;
+        };
+        MDCTabBarFoundation.prototype.activateTab = function (index) {
+            var previousActiveIndex = this.adapter_.getPreviousActiveTabIndex();
+            if (!this.indexIsInRange_(index) || index === previousActiveIndex) {
+                return;
+            }
+            var previousClientRect;
+            if (previousActiveIndex !== -1) {
+                this.adapter_.deactivateTabAtIndex(previousActiveIndex);
+                previousClientRect = this.adapter_.getTabIndicatorClientRectAtIndex(previousActiveIndex);
+            }
+            this.adapter_.activateTabAtIndex(index, previousClientRect);
+            this.scrollIntoView(index);
+            this.adapter_.notifyTabActivated(index);
+        };
+        MDCTabBarFoundation.prototype.handleKeyDown = function (evt) {
+            // Get the key from the event
+            var key = this.getKeyFromEvent_(evt);
+            // Early exit if the event key isn't one of the keyboard navigation keys
+            if (key === undefined) {
+                return;
+            }
+            // Prevent default behavior for movement keys, but not for activation keys, since :active is used to apply ripple
+            if (!this.isActivationKey_(key)) {
+                evt.preventDefault();
+            }
+            if (this.useAutomaticActivation_) {
+                if (this.isActivationKey_(key)) {
+                    return;
+                }
+                var index = this.determineTargetFromKey_(this.adapter_.getPreviousActiveTabIndex(), key);
+                this.adapter_.setActiveTab(index);
+                this.scrollIntoView(index);
+            }
+            else {
+                var focusedTabIndex = this.adapter_.getFocusedTabIndex();
+                if (this.isActivationKey_(key)) {
+                    this.adapter_.setActiveTab(focusedTabIndex);
+                }
+                else {
+                    var index = this.determineTargetFromKey_(focusedTabIndex, key);
+                    this.adapter_.focusTabAtIndex(index);
+                    this.scrollIntoView(index);
+                }
+            }
+        };
+        /**
+         * Handles the MDCTab:interacted event
+         */
+        MDCTabBarFoundation.prototype.handleTabInteraction = function (evt) {
+            this.adapter_.setActiveTab(this.adapter_.getIndexOfTabById(evt.detail.tabId));
+        };
+        /**
+         * Scrolls the tab at the given index into view
+         * @param index The tab index to make visible
+         */
+        MDCTabBarFoundation.prototype.scrollIntoView = function (index) {
+            // Early exit if the index is out of range
+            if (!this.indexIsInRange_(index)) {
+                return;
+            }
+            // Always scroll to 0 if scrolling to the 0th index
+            if (index === 0) {
+                return this.adapter_.scrollTo(0);
+            }
+            // Always scroll to the max value if scrolling to the Nth index
+            // MDCTabScroller.scrollTo() will never scroll past the max possible value
+            if (index === this.adapter_.getTabListLength() - 1) {
+                return this.adapter_.scrollTo(this.adapter_.getScrollContentWidth());
+            }
+            if (this.isRTL_()) {
+                return this.scrollIntoViewRTL_(index);
+            }
+            this.scrollIntoView_(index);
+        };
+        /**
+         * Private method for determining the index of the destination tab based on what key was pressed
+         * @param origin The original index from which to determine the destination
+         * @param key The name of the key
+         */
+        MDCTabBarFoundation.prototype.determineTargetFromKey_ = function (origin, key) {
+            var isRTL = this.isRTL_();
+            var maxIndex = this.adapter_.getTabListLength() - 1;
+            var shouldGoToEnd = key === strings$5.END_KEY;
+            var shouldDecrement = key === strings$5.ARROW_LEFT_KEY && !isRTL || key === strings$5.ARROW_RIGHT_KEY && isRTL;
+            var shouldIncrement = key === strings$5.ARROW_RIGHT_KEY && !isRTL || key === strings$5.ARROW_LEFT_KEY && isRTL;
+            var index = origin;
+            if (shouldGoToEnd) {
+                index = maxIndex;
+            }
+            else if (shouldDecrement) {
+                index -= 1;
+            }
+            else if (shouldIncrement) {
+                index += 1;
+            }
+            else {
+                index = 0;
+            }
+            if (index < 0) {
+                index = maxIndex;
+            }
+            else if (index > maxIndex) {
+                index = 0;
+            }
+            return index;
+        };
+        /**
+         * Calculates the scroll increment that will make the tab at the given index visible
+         * @param index The index of the tab
+         * @param nextIndex The index of the next tab
+         * @param scrollPosition The current scroll position
+         * @param barWidth The width of the Tab Bar
+         */
+        MDCTabBarFoundation.prototype.calculateScrollIncrement_ = function (index, nextIndex, scrollPosition, barWidth) {
+            var nextTabDimensions = this.adapter_.getTabDimensionsAtIndex(nextIndex);
+            var relativeContentLeft = nextTabDimensions.contentLeft - scrollPosition - barWidth;
+            var relativeContentRight = nextTabDimensions.contentRight - scrollPosition;
+            var leftIncrement = relativeContentRight - numbers$2.EXTRA_SCROLL_AMOUNT;
+            var rightIncrement = relativeContentLeft + numbers$2.EXTRA_SCROLL_AMOUNT;
+            if (nextIndex < index) {
+                return Math.min(leftIncrement, 0);
+            }
+            return Math.max(rightIncrement, 0);
+        };
+        /**
+         * Calculates the scroll increment that will make the tab at the given index visible in RTL
+         * @param index The index of the tab
+         * @param nextIndex The index of the next tab
+         * @param scrollPosition The current scroll position
+         * @param barWidth The width of the Tab Bar
+         * @param scrollContentWidth The width of the scroll content
+         */
+        MDCTabBarFoundation.prototype.calculateScrollIncrementRTL_ = function (index, nextIndex, scrollPosition, barWidth, scrollContentWidth) {
+            var nextTabDimensions = this.adapter_.getTabDimensionsAtIndex(nextIndex);
+            var relativeContentLeft = scrollContentWidth - nextTabDimensions.contentLeft - scrollPosition;
+            var relativeContentRight = scrollContentWidth - nextTabDimensions.contentRight - scrollPosition - barWidth;
+            var leftIncrement = relativeContentRight + numbers$2.EXTRA_SCROLL_AMOUNT;
+            var rightIncrement = relativeContentLeft - numbers$2.EXTRA_SCROLL_AMOUNT;
+            if (nextIndex > index) {
+                return Math.max(leftIncrement, 0);
+            }
+            return Math.min(rightIncrement, 0);
+        };
+        /**
+         * Determines the index of the adjacent tab closest to either edge of the Tab Bar
+         * @param index The index of the tab
+         * @param tabDimensions The dimensions of the tab
+         * @param scrollPosition The current scroll position
+         * @param barWidth The width of the tab bar
+         */
+        MDCTabBarFoundation.prototype.findAdjacentTabIndexClosestToEdge_ = function (index, tabDimensions, scrollPosition, barWidth) {
+            /**
+             * Tabs are laid out in the Tab Scroller like this:
+             *
+             *    Scroll Position
+             *    +---+
+             *    |   |   Bar Width
+             *    |   +-----------------------------------+
+             *    |   |                                   |
+             *    |   V                                   V
+             *    |   +-----------------------------------+
+             *    V   |             Tab Scroller          |
+             *    +------------+--------------+-------------------+
+             *    |    Tab     |      Tab     |        Tab        |
+             *    +------------+--------------+-------------------+
+             *        |                                   |
+             *        +-----------------------------------+
+             *
+             * To determine the next adjacent index, we look at the Tab root left and
+             * Tab root right, both relative to the scroll position. If the Tab root
+             * left is less than 0, then we know it's out of view to the left. If the
+             * Tab root right minus the bar width is greater than 0, we know the Tab is
+             * out of view to the right. From there, we either increment or decrement
+             * the index.
+             */
+            var relativeRootLeft = tabDimensions.rootLeft - scrollPosition;
+            var relativeRootRight = tabDimensions.rootRight - scrollPosition - barWidth;
+            var relativeRootDelta = relativeRootLeft + relativeRootRight;
+            var leftEdgeIsCloser = relativeRootLeft < 0 || relativeRootDelta < 0;
+            var rightEdgeIsCloser = relativeRootRight > 0 || relativeRootDelta > 0;
+            if (leftEdgeIsCloser) {
+                return index - 1;
+            }
+            if (rightEdgeIsCloser) {
+                return index + 1;
+            }
+            return -1;
+        };
+        /**
+         * Determines the index of the adjacent tab closest to either edge of the Tab Bar in RTL
+         * @param index The index of the tab
+         * @param tabDimensions The dimensions of the tab
+         * @param scrollPosition The current scroll position
+         * @param barWidth The width of the tab bar
+         * @param scrollContentWidth The width of the scroller content
+         */
+        MDCTabBarFoundation.prototype.findAdjacentTabIndexClosestToEdgeRTL_ = function (index, tabDimensions, scrollPosition, barWidth, scrollContentWidth) {
+            var rootLeft = scrollContentWidth - tabDimensions.rootLeft - barWidth - scrollPosition;
+            var rootRight = scrollContentWidth - tabDimensions.rootRight - scrollPosition;
+            var rootDelta = rootLeft + rootRight;
+            var leftEdgeIsCloser = rootLeft > 0 || rootDelta > 0;
+            var rightEdgeIsCloser = rootRight < 0 || rootDelta < 0;
+            if (leftEdgeIsCloser) {
+                return index + 1;
+            }
+            if (rightEdgeIsCloser) {
+                return index - 1;
+            }
+            return -1;
+        };
+        /**
+         * Returns the key associated with a keydown event
+         * @param evt The keydown event
+         */
+        MDCTabBarFoundation.prototype.getKeyFromEvent_ = function (evt) {
+            if (ACCEPTABLE_KEYS.has(evt.key)) {
+                return evt.key;
+            }
+            return KEYCODE_MAP.get(evt.keyCode);
+        };
+        MDCTabBarFoundation.prototype.isActivationKey_ = function (key) {
+            return key === strings$5.SPACE_KEY || key === strings$5.ENTER_KEY;
+        };
+        /**
+         * Returns whether a given index is inclusively between the ends
+         * @param index The index to test
+         */
+        MDCTabBarFoundation.prototype.indexIsInRange_ = function (index) {
+            return index >= 0 && index < this.adapter_.getTabListLength();
+        };
+        /**
+         * Returns the view's RTL property
+         */
+        MDCTabBarFoundation.prototype.isRTL_ = function () {
+            return this.adapter_.isRTL();
+        };
+        /**
+         * Scrolls the tab at the given index into view for left-to-right user agents.
+         * @param index The index of the tab to scroll into view
+         */
+        MDCTabBarFoundation.prototype.scrollIntoView_ = function (index) {
+            var scrollPosition = this.adapter_.getScrollPosition();
+            var barWidth = this.adapter_.getOffsetWidth();
+            var tabDimensions = this.adapter_.getTabDimensionsAtIndex(index);
+            var nextIndex = this.findAdjacentTabIndexClosestToEdge_(index, tabDimensions, scrollPosition, barWidth);
+            if (!this.indexIsInRange_(nextIndex)) {
+                return;
+            }
+            var scrollIncrement = this.calculateScrollIncrement_(index, nextIndex, scrollPosition, barWidth);
+            this.adapter_.incrementScroll(scrollIncrement);
+        };
+        /**
+         * Scrolls the tab at the given index into view in RTL
+         * @param index The tab index to make visible
+         */
+        MDCTabBarFoundation.prototype.scrollIntoViewRTL_ = function (index) {
+            var scrollPosition = this.adapter_.getScrollPosition();
+            var barWidth = this.adapter_.getOffsetWidth();
+            var tabDimensions = this.adapter_.getTabDimensionsAtIndex(index);
+            var scrollWidth = this.adapter_.getScrollContentWidth();
+            var nextIndex = this.findAdjacentTabIndexClosestToEdgeRTL_(index, tabDimensions, scrollPosition, barWidth, scrollWidth);
+            if (!this.indexIsInRange_(nextIndex)) {
+                return;
+            }
+            var scrollIncrement = this.calculateScrollIncrementRTL_(index, nextIndex, scrollPosition, barWidth, scrollWidth);
+            this.adapter_.incrementScroll(scrollIncrement);
+        };
+        return MDCTabBarFoundation;
+    }(MDCFoundation));
+
+    /**
+     * @license
+     * Copyright 2018 Google Inc.
+     *
+     * Permission is hereby granted, free of charge, to any person obtaining a copy
+     * of this software and associated documentation files (the "Software"), to deal
+     * in the Software without restriction, including without limitation the rights
+     * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     * copies of the Software, and to permit persons to whom the Software is
+     * furnished to do so, subject to the following conditions:
+     *
+     * The above copyright notice and this permission notice shall be included in
+     * all copies or substantial portions of the Software.
+     *
+     * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+     * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+     * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+     * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+     * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+     * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+     * THE SOFTWARE.
+     */
+    var strings$6 = MDCTabBarFoundation.strings;
+    var tabIdCounter = 0;
+    var MDCTabBar = /** @class */ (function (_super) {
+        __extends(MDCTabBar, _super);
+        function MDCTabBar() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MDCTabBar.attachTo = function (root) {
+            return new MDCTabBar(root);
+        };
+        Object.defineProperty(MDCTabBar.prototype, "focusOnActivate", {
+            set: function (focusOnActivate) {
+                this.tabList_.forEach(function (tab) { return tab.focusOnActivate = focusOnActivate; });
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(MDCTabBar.prototype, "useAutomaticActivation", {
+            set: function (useAutomaticActivation) {
+                this.foundation_.setUseAutomaticActivation(useAutomaticActivation);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        MDCTabBar.prototype.initialize = function (tabFactory, tabScrollerFactory) {
+            if (tabFactory === void 0) { tabFactory = function (el) { return new MDCTab(el); }; }
+            if (tabScrollerFactory === void 0) { tabScrollerFactory = function (el) { return new MDCTabScroller(el); }; }
+            this.tabList_ = this.instantiateTabs_(tabFactory);
+            this.tabScroller_ = this.instantiateTabScroller_(tabScrollerFactory);
+        };
+        MDCTabBar.prototype.initialSyncWithDOM = function () {
+            var _this = this;
+            this.handleTabInteraction_ = function (evt) { return _this.foundation_.handleTabInteraction(evt); };
+            this.handleKeyDown_ = function (evt) { return _this.foundation_.handleKeyDown(evt); };
+            this.listen(MDCTabFoundation.strings.INTERACTED_EVENT, this.handleTabInteraction_);
+            this.listen('keydown', this.handleKeyDown_);
+            for (var i = 0; i < this.tabList_.length; i++) {
+                if (this.tabList_[i].active) {
+                    this.scrollIntoView(i);
+                    break;
+                }
+            }
+        };
+        MDCTabBar.prototype.destroy = function () {
+            _super.prototype.destroy.call(this);
+            this.unlisten(MDCTabFoundation.strings.INTERACTED_EVENT, this.handleTabInteraction_);
+            this.unlisten('keydown', this.handleKeyDown_);
+            this.tabList_.forEach(function (tab) { return tab.destroy(); });
+            if (this.tabScroller_) {
+                this.tabScroller_.destroy();
+            }
+        };
+        MDCTabBar.prototype.getDefaultFoundation = function () {
+            var _this = this;
+            // DO NOT INLINE this variable. For backward compatibility, foundations take a Partial<MDCFooAdapter>.
+            // To ensure we don't accidentally omit any methods, we need a separate, strongly typed adapter variable.
+            // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+            var adapter = {
+                scrollTo: function (scrollX) { return _this.tabScroller_.scrollTo(scrollX); },
+                incrementScroll: function (scrollXIncrement) { return _this.tabScroller_.incrementScroll(scrollXIncrement); },
+                getScrollPosition: function () { return _this.tabScroller_.getScrollPosition(); },
+                getScrollContentWidth: function () { return _this.tabScroller_.getScrollContentWidth(); },
+                getOffsetWidth: function () { return _this.root_.offsetWidth; },
+                isRTL: function () { return window.getComputedStyle(_this.root_).getPropertyValue('direction') === 'rtl'; },
+                setActiveTab: function (index) { return _this.foundation_.activateTab(index); },
+                activateTabAtIndex: function (index, clientRect) { return _this.tabList_[index].activate(clientRect); },
+                deactivateTabAtIndex: function (index) { return _this.tabList_[index].deactivate(); },
+                focusTabAtIndex: function (index) { return _this.tabList_[index].focus(); },
+                getTabIndicatorClientRectAtIndex: function (index) { return _this.tabList_[index].computeIndicatorClientRect(); },
+                getTabDimensionsAtIndex: function (index) { return _this.tabList_[index].computeDimensions(); },
+                getPreviousActiveTabIndex: function () {
+                    for (var i = 0; i < _this.tabList_.length; i++) {
+                        if (_this.tabList_[i].active) {
+                            return i;
+                        }
+                    }
+                    return -1;
+                },
+                getFocusedTabIndex: function () {
+                    var tabElements = _this.getTabElements_();
+                    var activeElement = document.activeElement;
+                    return tabElements.indexOf(activeElement);
+                },
+                getIndexOfTabById: function (id) {
+                    for (var i = 0; i < _this.tabList_.length; i++) {
+                        if (_this.tabList_[i].id === id) {
+                            return i;
+                        }
+                    }
+                    return -1;
+                },
+                getTabListLength: function () { return _this.tabList_.length; },
+                notifyTabActivated: function (index) {
+                    return _this.emit(strings$6.TAB_ACTIVATED_EVENT, { index: index }, true);
+                },
+            };
+            // tslint:enable:object-literal-sort-keys
+            return new MDCTabBarFoundation(adapter);
+        };
+        /**
+         * Activates the tab at the given index
+         * @param index The index of the tab
+         */
+        MDCTabBar.prototype.activateTab = function (index) {
+            this.foundation_.activateTab(index);
+        };
+        /**
+         * Scrolls the tab at the given index into view
+         * @param index THe index of the tab
+         */
+        MDCTabBar.prototype.scrollIntoView = function (index) {
+            this.foundation_.scrollIntoView(index);
+        };
+        /**
+         * Returns all the tab elements in a nice clean array
+         */
+        MDCTabBar.prototype.getTabElements_ = function () {
+            return [].slice.call(this.root_.querySelectorAll(strings$6.TAB_SELECTOR));
+        };
+        /**
+         * Instantiates tab components on all child tab elements
+         */
+        MDCTabBar.prototype.instantiateTabs_ = function (tabFactory) {
+            return this.getTabElements_().map(function (el) {
+                el.id = el.id || "mdc-tab-" + ++tabIdCounter;
+                return tabFactory(el);
+            });
+        };
+        /**
+         * Instantiates tab scroller component on the child tab scroller element
+         */
+        MDCTabBar.prototype.instantiateTabScroller_ = function (tabScrollerFactory) {
+            var tabScrollerElement = this.root_.querySelector(strings$6.TAB_SCROLLER_SELECTOR);
+            if (tabScrollerElement) {
+                return tabScrollerFactory(tabScrollerElement);
+            }
+            return null;
+        };
+        return MDCTabBar;
+    }(MDCComponent));
+
+    /* node_modules/@smui/tab-scroller/TabScroller.svelte generated by Svelte v3.31.0 */
+    const file$D = "node_modules/@smui/tab-scroller/TabScroller.svelte";
+
+    function create_fragment$G(ctx) {
+    	let div2;
+    	let div1;
+    	let div0;
+    	let div0_class_value;
+    	let useActions_action;
+    	let div1_class_value;
+    	let useActions_action_1;
+    	let div2_class_value;
+    	let useActions_action_2;
+    	let forwardEvents_action;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	const default_slot_template = /*#slots*/ ctx[14].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[13], null);
+
+    	let div0_levels = [
+    		{
+    			class: div0_class_value = "mdc-tab-scroller__scroll-content " + /*scrollContent$class*/ ctx[5]
+    		},
+    		exclude(prefixFilter(/*$$props*/ ctx[8], "scrollContent$"), ["use", "class"])
+    	];
+
+    	let div0_data = {};
+
+    	for (let i = 0; i < div0_levels.length; i += 1) {
+    		div0_data = assign(div0_data, div0_levels[i]);
+    	}
+
+    	let div1_levels = [
+    		{
+    			class: div1_class_value = "mdc-tab-scroller__scroll-area " + /*scrollArea$class*/ ctx[3]
+    		},
+    		exclude(prefixFilter(/*$$props*/ ctx[8], "scrollArea$"), ["use", "class"])
+    	];
+
+    	let div1_data = {};
+
+    	for (let i = 0; i < div1_levels.length; i += 1) {
+    		div1_data = assign(div1_data, div1_levels[i]);
+    	}
+
+    	let div2_levels = [
+    		{
+    			class: div2_class_value = "mdc-tab-scroller " + /*className*/ ctx[1]
+    		},
+    		exclude(/*$$props*/ ctx[8], ["use", "class", "scrollArea$", "scrollContent$"])
+    	];
+
+    	let div2_data = {};
+
+    	for (let i = 0; i < div2_levels.length; i += 1) {
+    		div2_data = assign(div2_data, div2_levels[i]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div2 = element("div");
+    			div1 = element("div");
+    			div0 = element("div");
+    			if (default_slot) default_slot.c();
+    			set_attributes(div0, div0_data);
+    			add_location(div0, file$D, 12, 4, 371);
+    			set_attributes(div1, div1_data);
+    			add_location(div1, file$D, 7, 2, 188);
+    			set_attributes(div2, div2_data);
+    			add_location(div2, file$D, 0, 0, 0);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div2, anchor);
+    			append_dev(div2, div1);
+    			append_dev(div1, div0);
+
+    			if (default_slot) {
+    				default_slot.m(div0, null);
+    			}
+
+    			/*div2_binding*/ ctx[15](div2);
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					action_destroyer(useActions_action = useActions.call(null, div0, /*scrollContent$use*/ ctx[4])),
+    					action_destroyer(useActions_action_1 = useActions.call(null, div1, /*scrollArea$use*/ ctx[2])),
+    					action_destroyer(useActions_action_2 = useActions.call(null, div2, /*use*/ ctx[0])),
+    					action_destroyer(forwardEvents_action = /*forwardEvents*/ ctx[7].call(null, div2))
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (default_slot) {
+    				if (default_slot.p && dirty & /*$$scope*/ 8192) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[13], dirty, null, null);
+    				}
+    			}
+
+    			set_attributes(div0, div0_data = get_spread_update(div0_levels, [
+    				(!current || dirty & /*scrollContent$class*/ 32 && div0_class_value !== (div0_class_value = "mdc-tab-scroller__scroll-content " + /*scrollContent$class*/ ctx[5])) && { class: div0_class_value },
+    				dirty & /*$$props*/ 256 && exclude(prefixFilter(/*$$props*/ ctx[8], "scrollContent$"), ["use", "class"])
+    			]));
+
+    			if (useActions_action && is_function(useActions_action.update) && dirty & /*scrollContent$use*/ 16) useActions_action.update.call(null, /*scrollContent$use*/ ctx[4]);
+
+    			set_attributes(div1, div1_data = get_spread_update(div1_levels, [
+    				(!current || dirty & /*scrollArea$class*/ 8 && div1_class_value !== (div1_class_value = "mdc-tab-scroller__scroll-area " + /*scrollArea$class*/ ctx[3])) && { class: div1_class_value },
+    				dirty & /*$$props*/ 256 && exclude(prefixFilter(/*$$props*/ ctx[8], "scrollArea$"), ["use", "class"])
+    			]));
+
+    			if (useActions_action_1 && is_function(useActions_action_1.update) && dirty & /*scrollArea$use*/ 4) useActions_action_1.update.call(null, /*scrollArea$use*/ ctx[2]);
+
+    			set_attributes(div2, div2_data = get_spread_update(div2_levels, [
+    				(!current || dirty & /*className*/ 2 && div2_class_value !== (div2_class_value = "mdc-tab-scroller " + /*className*/ ctx[1])) && { class: div2_class_value },
+    				dirty & /*$$props*/ 256 && exclude(/*$$props*/ ctx[8], ["use", "class", "scrollArea$", "scrollContent$"])
+    			]));
+
+    			if (useActions_action_2 && is_function(useActions_action_2.update) && dirty & /*use*/ 1) useActions_action_2.update.call(null, /*use*/ ctx[0]);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div2);
+    			if (default_slot) default_slot.d(detaching);
+    			/*div2_binding*/ ctx[15](null);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$G.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$G($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("TabScroller", slots, ['default']);
+    	const forwardEvents = forwardEventsBuilder(get_current_component());
+    	let { use = [] } = $$props;
+    	let { class: className = "" } = $$props;
+    	let { scrollArea$use = [] } = $$props;
+    	let { scrollArea$class = "" } = $$props;
+    	let { scrollContent$use = [] } = $$props;
+    	let { scrollContent$class = "" } = $$props;
+    	let element;
+    	let tabScroller;
+    	let instantiate = getContext("SMUI:tab-scroller:instantiate");
+    	let getInstance = getContext("SMUI:tab-scroller:getInstance");
+
+    	onMount(async () => {
+    		if (instantiate !== false) {
+    			tabScroller = new MDCTabScroller(element);
+    		} else {
+    			tabScroller = await getInstance();
+    		}
+    	});
+
+    	onDestroy(() => {
+    		tabScroller && tabScroller.destroy();
+    	});
+
+    	function scrollTo(...args) {
+    		return tabScroller.scrollTo(...args);
+    	}
+
+    	function incrementScroll(...args) {
+    		return tabScroller.incrementScroll(...args);
+    	}
+
+    	function getScrollPosition(...args) {
+    		return tabScroller.getScrollPosition(...args);
+    	}
+
+    	function getScrollContentWidth(...args) {
+    		return tabScroller.getScrollContentWidth(...args);
+    	}
+
+    	function div2_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			element = $$value;
+    			$$invalidate(6, element);
+    		});
+    	}
+
+    	$$self.$$set = $$new_props => {
+    		$$invalidate(8, $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)));
+    		if ("use" in $$new_props) $$invalidate(0, use = $$new_props.use);
+    		if ("class" in $$new_props) $$invalidate(1, className = $$new_props.class);
+    		if ("scrollArea$use" in $$new_props) $$invalidate(2, scrollArea$use = $$new_props.scrollArea$use);
+    		if ("scrollArea$class" in $$new_props) $$invalidate(3, scrollArea$class = $$new_props.scrollArea$class);
+    		if ("scrollContent$use" in $$new_props) $$invalidate(4, scrollContent$use = $$new_props.scrollContent$use);
+    		if ("scrollContent$class" in $$new_props) $$invalidate(5, scrollContent$class = $$new_props.scrollContent$class);
+    		if ("$$scope" in $$new_props) $$invalidate(13, $$scope = $$new_props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		MDCTabScroller,
+    		onMount,
+    		onDestroy,
+    		getContext,
+    		get_current_component,
+    		forwardEventsBuilder,
+    		exclude,
+    		prefixFilter,
+    		useActions,
+    		forwardEvents,
+    		use,
+    		className,
+    		scrollArea$use,
+    		scrollArea$class,
+    		scrollContent$use,
+    		scrollContent$class,
+    		element,
+    		tabScroller,
+    		instantiate,
+    		getInstance,
+    		scrollTo,
+    		incrementScroll,
+    		getScrollPosition,
+    		getScrollContentWidth
+    	});
+
+    	$$self.$inject_state = $$new_props => {
+    		$$invalidate(8, $$props = assign(assign({}, $$props), $$new_props));
+    		if ("use" in $$props) $$invalidate(0, use = $$new_props.use);
+    		if ("className" in $$props) $$invalidate(1, className = $$new_props.className);
+    		if ("scrollArea$use" in $$props) $$invalidate(2, scrollArea$use = $$new_props.scrollArea$use);
+    		if ("scrollArea$class" in $$props) $$invalidate(3, scrollArea$class = $$new_props.scrollArea$class);
+    		if ("scrollContent$use" in $$props) $$invalidate(4, scrollContent$use = $$new_props.scrollContent$use);
+    		if ("scrollContent$class" in $$props) $$invalidate(5, scrollContent$class = $$new_props.scrollContent$class);
+    		if ("element" in $$props) $$invalidate(6, element = $$new_props.element);
+    		if ("tabScroller" in $$props) tabScroller = $$new_props.tabScroller;
+    		if ("instantiate" in $$props) instantiate = $$new_props.instantiate;
+    		if ("getInstance" in $$props) getInstance = $$new_props.getInstance;
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$props = exclude_internal_props($$props);
+
+    	return [
+    		use,
+    		className,
+    		scrollArea$use,
+    		scrollArea$class,
+    		scrollContent$use,
+    		scrollContent$class,
+    		element,
+    		forwardEvents,
+    		$$props,
+    		scrollTo,
+    		incrementScroll,
+    		getScrollPosition,
+    		getScrollContentWidth,
+    		$$scope,
+    		slots,
+    		div2_binding
+    	];
+    }
+
+    class TabScroller extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$G, create_fragment$G, safe_not_equal, {
+    			use: 0,
+    			class: 1,
+    			scrollArea$use: 2,
+    			scrollArea$class: 3,
+    			scrollContent$use: 4,
+    			scrollContent$class: 5,
+    			scrollTo: 9,
+    			incrementScroll: 10,
+    			getScrollPosition: 11,
+    			getScrollContentWidth: 12
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "TabScroller",
+    			options,
+    			id: create_fragment$G.name
+    		});
+    	}
+
+    	get use() {
+    		throw new Error("<TabScroller>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set use(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get class() {
+    		throw new Error("<TabScroller>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set class(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get scrollArea$use() {
+    		throw new Error("<TabScroller>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set scrollArea$use(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get scrollArea$class() {
+    		throw new Error("<TabScroller>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set scrollArea$class(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get scrollContent$use() {
+    		throw new Error("<TabScroller>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set scrollContent$use(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get scrollContent$class() {
+    		throw new Error("<TabScroller>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set scrollContent$class(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get scrollTo() {
+    		return this.$$.ctx[9];
+    	}
+
+    	set scrollTo(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get incrementScroll() {
+    		return this.$$.ctx[10];
+    	}
+
+    	set incrementScroll(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get getScrollPosition() {
+    		return this.$$.ctx[11];
+    	}
+
+    	set getScrollPosition(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get getScrollContentWidth() {
+    		return this.$$.ctx[12];
+    	}
+
+    	set getScrollContentWidth(value) {
+    		throw new Error("<TabScroller>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules/@smui/tab-bar/TabBar.svelte generated by Svelte v3.31.0 */
+    const file$E = "node_modules/@smui/tab-bar/TabBar.svelte";
+
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[28] = list[i];
+    	child_ctx[30] = i;
+    	return child_ctx;
+    }
+
+    const get_default_slot_changes = dirty => ({ tab: dirty & /*tabs*/ 4 });
+    const get_default_slot_context = ctx => ({ tab: /*tab*/ ctx[28] });
+
+    // (13:4) {#each tabs as tab, i (key(tab))}
+    function create_each_block(key_2, ctx) {
+    	let first;
+    	let current;
+    	const default_slot_template = /*#slots*/ ctx[17].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[19], get_default_slot_context);
+
+    	const block = {
+    		key: key_2,
+    		first: null,
+    		c: function create() {
+    			first = empty();
+    			if (default_slot) default_slot.c();
+    			this.first = first;
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, first, anchor);
+
+    			if (default_slot) {
+    				default_slot.m(target, anchor);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (default_slot) {
+    				if (default_slot.p && dirty & /*$$scope, tabs*/ 524292) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[19], dirty, get_default_slot_changes, get_default_slot_context);
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(first);
+    			if (default_slot) default_slot.d(detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(13:4) {#each tabs as tab, i (key(tab))}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (10:2) <TabScroller     {...prefixFilter($$props, 'tabScroller$')}   >
+    function create_default_slot$2(ctx) {
+    	let each_blocks = [];
+    	let each_1_lookup = new Map();
+    	let each_1_anchor;
+    	let current;
+    	let each_value = /*tabs*/ ctx[2];
+    	validate_each_argument(each_value);
+    	const get_key = ctx => /*key*/ ctx[3](/*tab*/ ctx[28]);
+    	validate_each_keys(ctx, each_value, get_each_context, get_key);
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		let child_ctx = get_each_context(ctx, each_value, i);
+    		let key = get_key(child_ctx);
+    		each_1_lookup.set(key, each_blocks[i] = create_each_block(key, child_ctx));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			each_1_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(target, anchor);
+    			}
+
+    			insert_dev(target, each_1_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*$$scope, tabs, key*/ 524300) {
+    				const each_value = /*tabs*/ ctx[2];
+    				validate_each_argument(each_value);
+    				group_outros();
+    				validate_each_keys(ctx, each_value, get_each_context, get_key);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, each_1_anchor.parentNode, outro_and_destroy_block, create_each_block, each_1_anchor, get_each_context);
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			for (let i = 0; i < each_value.length; i += 1) {
+    				transition_in(each_blocks[i]);
+    			}
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				transition_out(each_blocks[i]);
+    			}
+
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].d(detaching);
+    			}
+
+    			if (detaching) detach_dev(each_1_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot$2.name,
+    		type: "slot",
+    		source: "(10:2) <TabScroller     {...prefixFilter($$props, 'tabScroller$')}   >",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$H(ctx) {
+    	let div;
+    	let tabscroller;
+    	let div_class_value;
+    	let useActions_action;
+    	let forwardEvents_action;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	const tabscroller_spread_levels = [prefixFilter(/*$$props*/ ctx[7], "tabScroller$")];
+
+    	let tabscroller_props = {
+    		$$slots: { default: [create_default_slot$2] },
+    		$$scope: { ctx }
+    	};
+
+    	for (let i = 0; i < tabscroller_spread_levels.length; i += 1) {
+    		tabscroller_props = assign(tabscroller_props, tabscroller_spread_levels[i]);
+    	}
+
+    	tabscroller = new TabScroller({ props: tabscroller_props, $$inline: true });
+
+    	let div_levels = [
+    		{
+    			class: div_class_value = "mdc-tab-bar " + /*className*/ ctx[1]
+    		},
+    		{ role: "tablist" },
+    		exclude(/*$$props*/ ctx[7], [
+    			"use",
+    			"class",
+    			"tabs",
+    			"key",
+    			"focusOnActivate",
+    			"useAutomaticActivation",
+    			"activeIndex",
+    			"tabScroller$"
+    		])
+    	];
+
+    	let div_data = {};
+
+    	for (let i = 0; i < div_levels.length; i += 1) {
+    		div_data = assign(div_data, div_levels[i]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			create_component(tabscroller.$$.fragment);
+    			set_attributes(div, div_data);
+    			add_location(div, file$E, 0, 0, 0);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			mount_component(tabscroller, div, null);
+    			/*div_binding*/ ctx[18](div);
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					action_destroyer(useActions_action = useActions.call(null, div, /*use*/ ctx[0])),
+    					action_destroyer(forwardEvents_action = /*forwardEvents*/ ctx[5].call(null, div)),
+    					listen_dev(div, "MDCTabBar:activated", /*activatedHandler*/ ctx[6], false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			const tabscroller_changes = (dirty & /*prefixFilter, $$props*/ 128)
+    			? get_spread_update(tabscroller_spread_levels, [get_spread_object(prefixFilter(/*$$props*/ ctx[7], "tabScroller$"))])
+    			: {};
+
+    			if (dirty & /*$$scope, tabs*/ 524292) {
+    				tabscroller_changes.$$scope = { dirty, ctx };
+    			}
+
+    			tabscroller.$set(tabscroller_changes);
+
+    			set_attributes(div, div_data = get_spread_update(div_levels, [
+    				(!current || dirty & /*className*/ 2 && div_class_value !== (div_class_value = "mdc-tab-bar " + /*className*/ ctx[1])) && { class: div_class_value },
+    				{ role: "tablist" },
+    				dirty & /*$$props*/ 128 && exclude(/*$$props*/ ctx[7], [
+    					"use",
+    					"class",
+    					"tabs",
+    					"key",
+    					"focusOnActivate",
+    					"useAutomaticActivation",
+    					"activeIndex",
+    					"tabScroller$"
+    				])
+    			]));
+
+    			if (useActions_action && is_function(useActions_action.update) && dirty & /*use*/ 1) useActions_action.update.call(null, /*use*/ ctx[0]);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tabscroller.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tabscroller.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_component(tabscroller);
+    			/*div_binding*/ ctx[18](null);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$H.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$H($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots("TabBar", slots, ['default']);
+    	const forwardEvents = forwardEventsBuilder(get_current_component(), ["MDCTabBar:activated"]);
+
+    	let uninitializedValue = () => {
+    		
+    	};
+
+    	let { use = [] } = $$props;
+    	let { class: className = "" } = $$props;
+    	let { tabs = [] } = $$props;
+    	let { key = tab => tab } = $$props;
+    	let { focusOnActivate = true } = $$props;
+    	let { useAutomaticActivation = true } = $$props;
+    	let { activeIndex = uninitializedValue } = $$props;
+    	let { active = uninitializedValue } = $$props;
+
+    	if (activeIndex === uninitializedValue && active === uninitializedValue) {
+    		activeIndex = 0;
+    		active = tabs[0];
+    	} else if (activeIndex === uninitializedValue) {
+    		activeIndex = tabs.indexOf(active);
+    	} else if (active === uninitializedValue) {
+    		active = tabs[activeIndex];
+    	}
+
+    	let element;
+    	let tabBar;
+    	let tabScrollerPromiseResolve;
+    	let tabScrollerPromise = new Promise(resolve => tabScrollerPromiseResolve = resolve);
+    	let tabPromiseResolve = [];
+    	let tabPromise = tabs.map((tab, i) => new Promise(resolve => tabPromiseResolve[i] = resolve));
+    	setContext("SMUI:tab-scroller:instantiate", false);
+    	setContext("SMUI:tab-scroller:getInstance", getTabScrollerInstancePromise);
+    	setContext("SMUI:tab:instantiate", false);
+    	setContext("SMUI:tab:getInstance", getTabInstancePromise);
+    	setContext("SMUI:tab:active", active);
+    	let previousActiveIndex = activeIndex;
+    	let previousActive = active;
+
+    	onMount(() => {
+    		$$invalidate(14, tabBar = new MDCTabBar(element));
+    		tabScrollerPromiseResolve(tabBar.tabScroller_);
+
+    		for (let i = 0; i < tabs.length; i++) {
+    			tabPromiseResolve[i](tabBar.tabList_[i]);
+    		}
+    	});
+
+    	onDestroy(() => {
+    		tabBar && tabBar.destroy();
+    	});
+
+    	function getTabScrollerInstancePromise() {
+    		return tabScrollerPromise;
+    	}
+
+    	function getTabInstancePromise(tabEntry) {
+    		return tabPromise[tabs.indexOf(tabEntry)];
+    	}
+
+    	function updateIndexAfterActivate(index) {
+    		$$invalidate(8, activeIndex = index);
+    		$$invalidate(15, previousActiveIndex = index);
+    		$$invalidate(9, active = tabs[index]);
+    		$$invalidate(16, previousActive = tabs[index]);
+    	}
+
+    	function activatedHandler(e) {
+    		updateIndexAfterActivate(e.detail.index);
+    	}
+
+    	function activateTab(index, ...args) {
+    		updateIndexAfterActivate(index);
+    		return tabBar.activateTab(index, ...args);
+    	}
+
+    	function scrollIntoView(...args) {
+    		return tabBar.scrollIntoView(...args);
+    	}
+
+    	function div_binding($$value) {
+    		binding_callbacks[$$value ? "unshift" : "push"](() => {
+    			element = $$value;
+    			$$invalidate(4, element);
+    		});
+    	}
+
+    	$$self.$$set = $$new_props => {
+    		$$invalidate(7, $$props = assign(assign({}, $$props), exclude_internal_props($$new_props)));
+    		if ("use" in $$new_props) $$invalidate(0, use = $$new_props.use);
+    		if ("class" in $$new_props) $$invalidate(1, className = $$new_props.class);
+    		if ("tabs" in $$new_props) $$invalidate(2, tabs = $$new_props.tabs);
+    		if ("key" in $$new_props) $$invalidate(3, key = $$new_props.key);
+    		if ("focusOnActivate" in $$new_props) $$invalidate(10, focusOnActivate = $$new_props.focusOnActivate);
+    		if ("useAutomaticActivation" in $$new_props) $$invalidate(11, useAutomaticActivation = $$new_props.useAutomaticActivation);
+    		if ("activeIndex" in $$new_props) $$invalidate(8, activeIndex = $$new_props.activeIndex);
+    		if ("active" in $$new_props) $$invalidate(9, active = $$new_props.active);
+    		if ("$$scope" in $$new_props) $$invalidate(19, $$scope = $$new_props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		MDCTabBar,
+    		onMount,
+    		onDestroy,
+    		setContext,
+    		get_current_component,
+    		forwardEventsBuilder,
+    		exclude,
+    		prefixFilter,
+    		useActions,
+    		TabScroller,
+    		forwardEvents,
+    		uninitializedValue,
+    		use,
+    		className,
+    		tabs,
+    		key,
+    		focusOnActivate,
+    		useAutomaticActivation,
+    		activeIndex,
+    		active,
+    		element,
+    		tabBar,
+    		tabScrollerPromiseResolve,
+    		tabScrollerPromise,
+    		tabPromiseResolve,
+    		tabPromise,
+    		previousActiveIndex,
+    		previousActive,
+    		getTabScrollerInstancePromise,
+    		getTabInstancePromise,
+    		updateIndexAfterActivate,
+    		activatedHandler,
+    		activateTab,
+    		scrollIntoView
+    	});
+
+    	$$self.$inject_state = $$new_props => {
+    		$$invalidate(7, $$props = assign(assign({}, $$props), $$new_props));
+    		if ("uninitializedValue" in $$props) uninitializedValue = $$new_props.uninitializedValue;
+    		if ("use" in $$props) $$invalidate(0, use = $$new_props.use);
+    		if ("className" in $$props) $$invalidate(1, className = $$new_props.className);
+    		if ("tabs" in $$props) $$invalidate(2, tabs = $$new_props.tabs);
+    		if ("key" in $$props) $$invalidate(3, key = $$new_props.key);
+    		if ("focusOnActivate" in $$props) $$invalidate(10, focusOnActivate = $$new_props.focusOnActivate);
+    		if ("useAutomaticActivation" in $$props) $$invalidate(11, useAutomaticActivation = $$new_props.useAutomaticActivation);
+    		if ("activeIndex" in $$props) $$invalidate(8, activeIndex = $$new_props.activeIndex);
+    		if ("active" in $$props) $$invalidate(9, active = $$new_props.active);
+    		if ("element" in $$props) $$invalidate(4, element = $$new_props.element);
+    		if ("tabBar" in $$props) $$invalidate(14, tabBar = $$new_props.tabBar);
+    		if ("tabScrollerPromiseResolve" in $$props) tabScrollerPromiseResolve = $$new_props.tabScrollerPromiseResolve;
+    		if ("tabScrollerPromise" in $$props) tabScrollerPromise = $$new_props.tabScrollerPromise;
+    		if ("tabPromiseResolve" in $$props) tabPromiseResolve = $$new_props.tabPromiseResolve;
+    		if ("tabPromise" in $$props) tabPromise = $$new_props.tabPromise;
+    		if ("previousActiveIndex" in $$props) $$invalidate(15, previousActiveIndex = $$new_props.previousActiveIndex);
+    		if ("previousActive" in $$props) $$invalidate(16, previousActive = $$new_props.previousActive);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*tabBar, focusOnActivate*/ 17408) {
+    			 if (tabBar) {
+    				$$invalidate(14, tabBar.focusOnActivate = focusOnActivate, tabBar);
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*tabBar, useAutomaticActivation*/ 18432) {
+    			 if (tabBar) {
+    				$$invalidate(14, tabBar.useAutomaticActivation = useAutomaticActivation, tabBar);
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*tabBar, tabs, activeIndex*/ 16644) {
+    			 if (tabBar) {
+    				$$invalidate(9, active = tabs[activeIndex]);
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*tabBar, previousActiveIndex, activeIndex*/ 49408) {
+    			 if (tabBar && previousActiveIndex !== activeIndex) {
+    				activateTab(activeIndex);
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*tabBar, previousActive, active, tabs*/ 82436) {
+    			 if (tabBar && previousActive !== active) {
+    				activateTab(tabs.indexOf(active));
+    			}
+    		}
+    	};
+
+    	$$props = exclude_internal_props($$props);
+
+    	return [
+    		use,
+    		className,
+    		tabs,
+    		key,
+    		element,
+    		forwardEvents,
+    		activatedHandler,
+    		$$props,
+    		activeIndex,
+    		active,
+    		focusOnActivate,
+    		useAutomaticActivation,
+    		activateTab,
+    		scrollIntoView,
+    		tabBar,
+    		previousActiveIndex,
+    		previousActive,
+    		slots,
+    		div_binding,
+    		$$scope
+    	];
+    }
+
+    class TabBar extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$H, create_fragment$H, safe_not_equal, {
+    			use: 0,
+    			class: 1,
+    			tabs: 2,
+    			key: 3,
+    			focusOnActivate: 10,
+    			useAutomaticActivation: 11,
+    			activeIndex: 8,
+    			active: 9,
+    			activateTab: 12,
+    			scrollIntoView: 13
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "TabBar",
+    			options,
+    			id: create_fragment$H.name
+    		});
+    	}
+
+    	get use() {
+    		throw new Error("<TabBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set use(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get class() {
+    		throw new Error("<TabBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set class(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get tabs() {
+    		throw new Error("<TabBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set tabs(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get key() {
+    		throw new Error("<TabBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set key(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get focusOnActivate() {
+    		throw new Error("<TabBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set focusOnActivate(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get useAutomaticActivation() {
+    		throw new Error("<TabBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set useAutomaticActivation(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get activeIndex() {
+    		throw new Error("<TabBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set activeIndex(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get active() {
+    		throw new Error("<TabBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set active(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get activateTab() {
+    		return this.$$.ctx[12];
+    	}
+
+    	set activateTab(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get scrollIntoView() {
+    		return this.$$.ctx[13];
+    	}
+
+    	set scrollIntoView(value) {
+    		throw new Error("<TabBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/App.svelte generated by Svelte v3.31.0 */
+    const file$F = "src/App.svelte";
+
+    // (65:6) <Icon class="material-icons">
+    function create_default_slot_3(ctx) {
+    	let t_value = /*tab*/ ctx[3].icon + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text(t_value);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*tab*/ 8 && t_value !== (t_value = /*tab*/ ctx[3].icon + "")) set_data_dev(t, t_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_3.name,
+    		type: "slot",
+    		source: "(65:6) <Icon class=\\\"material-icons\\\">",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (66:6) <Label>
+    function create_default_slot_2(ctx) {
+    	let t_value = /*tab*/ ctx[3].label + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text(t_value);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*tab*/ 8 && t_value !== (t_value = /*tab*/ ctx[3].label + "")) set_data_dev(t, t_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_2.name,
+    		type: "slot",
+    		source: "(66:6) <Label>",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (64:4) <Tab  {tab} stacked={true} indicatorSpanOnlyContent={true} tabIndicator$transition="fade">
+    function create_default_slot_1$1(ctx) {
+    	let icon;
+    	let t;
+    	let label;
+    	let current;
+
+    	icon = new Icon({
+    			props: {
+    				class: "material-icons",
+    				$$slots: { default: [create_default_slot_3] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	label = new Label({
+    			props: {
+    				$$slots: { default: [create_default_slot_2] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(icon.$$.fragment);
+    			t = space();
+    			create_component(label.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(icon, target, anchor);
+    			insert_dev(target, t, anchor);
+    			mount_component(label, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const icon_changes = {};
+
+    			if (dirty & /*$$scope, tab*/ 24) {
+    				icon_changes.$$scope = { dirty, ctx };
+    			}
+
+    			icon.$set(icon_changes);
+    			const label_changes = {};
+
+    			if (dirty & /*$$scope, tab*/ 24) {
+    				label_changes.$$scope = { dirty, ctx };
+    			}
+
+    			label.$set(label_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(icon.$$.fragment, local);
+    			transition_in(label.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(icon.$$.fragment, local);
+    			transition_out(label.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(icon, detaching);
+    			if (detaching) detach_dev(t);
+    			destroy_component(label, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot_1$1.name,
+    		type: "slot",
+    		source: "(64:4) <Tab  {tab} stacked={true} indicatorSpanOnlyContent={true} tabIndicator$transition=\\\"fade\\\">",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (62:2) <TabBar tabs={keyedTabs} let:tab key={tab => tab.k} bind:active={keyedTabsActive}>
+    function create_default_slot$3(ctx) {
+    	let a;
+    	let tab;
+    	let a_href_value;
+    	let link_action;
+    	let current;
+    	let mounted;
+    	let dispose;
+
+    	tab = new Tab({
+    			props: {
+    				tab: /*tab*/ ctx[3],
+    				stacked: true,
+    				indicatorSpanOnlyContent: true,
+    				tabIndicator$transition: "fade",
+    				$$slots: { default: [create_default_slot_1$1] },
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			a = element("a");
+    			create_component(tab.$$.fragment);
+    			attr_dev(a, "href", a_href_value = /*tab*/ ctx[3].url);
+    			add_location(a, file$F, 62, 4, 1401);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, a, anchor);
+    			mount_component(tab, a, null);
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = action_destroyer(link_action = link.call(null, a));
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, dirty) {
+    			const tab_changes = {};
+    			if (dirty & /*tab*/ 8) tab_changes.tab = /*tab*/ ctx[3];
+
+    			if (dirty & /*$$scope, tab*/ 24) {
+    				tab_changes.$$scope = { dirty, ctx };
+    			}
+
+    			tab.$set(tab_changes);
+
+    			if (!current || dirty & /*tab*/ 8 && a_href_value !== (a_href_value = /*tab*/ ctx[3].url)) {
+    				attr_dev(a, "href", a_href_value);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tab.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tab.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(a);
+    			destroy_component(tab);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot$3.name,
+    		type: "slot",
+    		source: "(62:2) <TabBar tabs={keyedTabs} let:tab key={tab => tab.k} bind:active={keyedTabsActive}>",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$I(ctx) {
+    	let main;
+    	let tabbar;
+    	let updating_active;
+    	let t;
+    	let router;
+    	let current;
+
+    	function tabbar_active_binding(value) {
+    		/*tabbar_active_binding*/ ctx[2].call(null, value);
+    	}
+
+    	let tabbar_props = {
+    		tabs: /*keyedTabs*/ ctx[1],
+    		key: func,
+    		$$slots: {
+    			default: [create_default_slot$3, ({ tab }) => ({ 3: tab }), ({ tab }) => tab ? 8 : 0]
+    		},
+    		$$scope: { ctx }
+    	};
+
+    	if (/*keyedTabsActive*/ ctx[0] !== void 0) {
+    		tabbar_props.active = /*keyedTabsActive*/ ctx[0];
+    	}
+
+    	tabbar = new TabBar({ props: tabbar_props, $$inline: true });
+    	binding_callbacks.push(() => bind(tabbar, "active", tabbar_active_binding));
+    	router = new Router({ props: { routes }, $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			main = element("main");
+    			create_component(tabbar.$$.fragment);
+    			t = space();
+    			create_component(router.$$.fragment);
+    			add_location(main, file$F, 43, 0, 704);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, main, anchor);
+    			mount_component(tabbar, main, null);
+    			append_dev(main, t);
+    			mount_component(router, main, null);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			const tabbar_changes = {};
+
+    			if (dirty & /*$$scope, tab*/ 24) {
+    				tabbar_changes.$$scope = { dirty, ctx };
+    			}
+
+    			if (!updating_active && dirty & /*keyedTabsActive*/ 1) {
+    				updating_active = true;
+    				tabbar_changes.active = /*keyedTabsActive*/ ctx[0];
+    				add_flush_callback(() => updating_active = false);
+    			}
+
+    			tabbar.$set(tabbar_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(tabbar.$$.fragment, local);
+    			transition_in(router.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(tabbar.$$.fragment, local);
+    			transition_out(router.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(main);
+    			destroy_component(tabbar);
+    			destroy_component(router);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$I.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     function share() {
     	Website2APK.shareIntent();
     }
 
-    function instance$C($$self, $$props, $$invalidate) {
+    const func = tab => tab.k;
+
+    function instance$I($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("App", slots, []);
+
+    	let keyedTabs = [
+    		{
+    			k: 1,
+    			icon: "home",
+    			label: "INICIO",
+    			url: "/"
+    		},
+    		{
+    			k: 2,
+    			icon: "class",
+    			label: "MITOS",
+    			url: "/mitos"
+    		},
+    		{
+    			k: 3,
+    			icon: "search",
+    			label: "BUSCAR",
+    			url: "/buscar"
+    		},
+    		{
+    			k: 4,
+    			icon: "share",
+    			label: "COMPARTE",
+    			url: "/compartir"
+    		}
+    	];
+
+    	let keyedTabsActive = keyedTabs[2];
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== "$$") console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = () => share();
-    	$$self.$capture_state = () => ({ Router, link, routes, share });
-    	return [click_handler];
+    	function tabbar_active_binding(value) {
+    		keyedTabsActive = value;
+    		$$invalidate(0, keyedTabsActive);
+    	}
+
+    	$$self.$capture_state = () => ({
+    		Router,
+    		link,
+    		routes,
+    		share,
+    		Tab,
+    		Icon,
+    		Label,
+    		TabBar,
+    		keyedTabs,
+    		keyedTabsActive
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ("keyedTabs" in $$props) $$invalidate(1, keyedTabs = $$props.keyedTabs);
+    		if ("keyedTabsActive" in $$props) $$invalidate(0, keyedTabsActive = $$props.keyedTabsActive);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [keyedTabsActive, keyedTabs, tabbar_active_binding];
     }
 
     class App extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$C, create_fragment$C, safe_not_equal, {});
+    		init(this, options, instance$I, create_fragment$I, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "App",
     			options,
-    			id: create_fragment$C.name
+    			id: create_fragment$I.name
     		});
     	}
     }

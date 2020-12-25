@@ -7,11 +7,43 @@
     Website2APK.shareIntent();
   }
   
+
+  import Tab, {Icon, Label} from '@smui/tab';
+  import TabBar from '@smui/tab-bar';
+
+  let keyedTabs = [
+    {
+      k: 1,
+      icon: 'home',
+      label: 'INICIO',
+      url: '/'
+    },
+    {
+      k: 2,
+      icon: 'class',
+      label: 'MITOS',
+      url: '/mitos'
+    },
+    {
+      k: 3,
+      icon: 'search',
+      label: 'BUSCAR',
+      url:'/buscar'
+    },
+    {
+      k: 4,
+      icon: 'share',
+      label: 'COMPARTE',
+      url: '/compartir'
+    }
+  ];
+  let keyedTabsActive = keyedTabs[2];
+
 </script>
 
 <main>
 
-    <!-- navbar bottom -->
+    <!-- navbar bottom 
     <nav class="navbarbaja">
       <div class="nav-fixed">
           <a href="/" use:link class="brand-logo center"><img src="img/Icon_menu/inicio.svg" alt="inicio" width="80%"></a>
@@ -26,6 +58,15 @@
 
       </div>
   </nav>
+  -->
+  <TabBar tabs={keyedTabs} let:tab key={tab => tab.k} bind:active={keyedTabsActive}>
+    <a href="{tab.url}" use:link>
+    <Tab  {tab} stacked={true} indicatorSpanOnlyContent={true} tabIndicator$transition="fade">
+      <Icon class="material-icons">{tab.icon}</Icon>
+      <Label>{tab.label}</Label>
+    </Tab>
+    </a>
+  </TabBar>
 
 <Router {routes} />
 
@@ -44,7 +85,6 @@
 }
 
 
-
 :global(.menu_abajo){
 	background-color: white;
 	bottom: 0px;
@@ -59,21 +99,5 @@
 
 }
 
-/* barra baja */
-.navbarbaja {
-    background-color: #DFD7C3;
-    overflow: hidden;
-    position: fixed;
-    bottom: 0px;
-    width: 100%;
-    z-index: 999;
-    margin: 0 auto;
-    padding: 5px;
-    border-radius: 30px 30px 0px 0px;
-    -moz-border-radius: 30px 30px 0px 0px;
-    -webkit-border-radius: 30px 30px 0px 0px;
-    border: 0px solid;
-
-}
 
 </style>
