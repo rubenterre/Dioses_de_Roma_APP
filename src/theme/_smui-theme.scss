@@ -1,5 +1,32 @@
 /* Estilos Card Dioses */
 
+:root {
+    --mdc-theme-primary: #1d1c1a;
+    --mdc-theme-secondary: #DFD7C3;
+    --mdc-theme-background: #fff;
+    --mdc-theme-surface: #fff;
+    --mdc-theme-error: #b71c1c;
+    --mdc-theme-on-primary: #fff;
+    --mdc-theme-on-secondary: #fff;
+    --mdc-theme-on-surface: #000;
+    --mdc-theme-on-error: #fff;
+    --mdc-theme-text-primary-on-background: rgba(0,0,0,0.87);
+    --mdc-theme-text-secondary-on-background: rgba(0,0,0,0.54);
+    --mdc-theme-text-hint-on-background: rgba(0,0,0,0.38);
+    --mdc-theme-text-disabled-on-background: rgba(0,0,0,0.38);
+    --mdc-theme-text-icon-on-background: rgba(0,0,0,0.38);
+    --mdc-theme-text-primary-on-light: rgba(0,0,0,0.87);
+    --mdc-theme-text-secondary-on-light: rgba(0,0,0,0.54);
+    --mdc-theme-text-hint-on-light: rgba(0,0,0,0.38);
+    --mdc-theme-text-disabled-on-light: rgba(0,0,0,0.38);
+    --mdc-theme-text-icon-on-light: rgba(0,0,0,0.38);
+    --mdc-theme-text-primary-on-dark: #fff;
+    --mdc-theme-text-secondary-on-dark: hsla(0,0%,100%,0.7);
+    --mdc-theme-text-hint-on-dark: hsla(0,0%,100%,0.5);
+    --mdc-theme-text-disabled-on-dark: hsla(0,0%,100%,0.5);
+    --mdc-theme-text-icon-on-dark: hsla(0,0%,100%,0.5);
+  }
+
 .card .card-image img {
     width: 80%!important;
     margin: 0px auto;
@@ -37,4 +64,40 @@
 
 .dioses_card{
     margin-bottom: 80px!important;
+}
+
+/* barra baja */
+
+
+.mdc-tab-bar{
+    background-color: #DFD7C3;
+    overflow: hidden;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    z-index: 999;
+}
+
+.icon-indicators :global(.mdc-tab-indicator--active .mdc-tab-indicator__content) {
+    opacity: .2;
+    background-color: white;
+  }
+
+.mdc-tab--active{
+    background-color: white;
+}
+
+.mdc-tab__ripple:after, .mdc-tab__ripple:before {
+    background-color: var(--mdc-theme-primary,#DFD7C3);
+}
+
+.mdc-ripple-upgraded{
+    background-color: var(--mdc-theme-secondary,#DFD7C3);
+}
+.mdc-ripple-upgraded--background-focused{
+    background-color: var(--mdc-theme-secondary,#DFD7C3);
+}
+
+.mdc-tab-scroller__scroll-content {
+    justify-content: center;
 }
