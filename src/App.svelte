@@ -93,5 +93,8 @@
 
 }
 
+a{
+  color: transparent;
+}
 
 </style>
