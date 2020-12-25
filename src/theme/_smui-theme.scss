@@ -97,3 +97,7 @@
 .mdc-ripple-upgraded--background-focused{
     background-color: var(--mdc-theme-secondary,#DFD7C3);
 }
+
+.mdc-tab-scroller__scroll-content {
+    justify-content: center;
+}

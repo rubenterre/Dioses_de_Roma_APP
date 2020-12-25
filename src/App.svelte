@@ -13,22 +13,16 @@
 
   let keyedTabs = [
     {
-      k: 1,
-      icon: 'home',
-      label: 'INICIO',
-      url: '/'
-    },
-    {
-      k: 2,
-      icon: 'class',
-      label: 'MITOS',
-      url: '/mitos'
-    },
-    {
       k: 3,
       icon: 'search',
       label: 'BUSCAR',
       url:'/buscar'
+    },
+    {
+      k: 1,
+      icon: 'home',
+      label: 'INICIO',
+      url: '/'
     },
     {
       k: 4,
@@ -59,6 +53,7 @@
       </div>
   </nav>
   -->
+
   <TabBar tabs={keyedTabs} let:tab key={tab => tab.k} bind:active={keyedTabsActive}>
     <a href="{tab.url}" use:link>
     <Tab  {tab} stacked={true} indicatorSpanOnlyContent={true} tabIndicator$transition="fade">
@@ -83,7 +78,6 @@
     background-color: #111518;
     height: 100%;
 }
-
 
 :global(.menu_abajo){
 	background-color: white;
