@@ -237,6 +237,11 @@
 
 	</div>
 	<div class="btn_dioses">
+		<button href="javascript:void(0)" id="Neptuno_boton" class="btn-dios transparent" on:click={()=> neptuno = true}
+			><img src="../img/dioses romanos_btn/Neptuno_btn.webp" alt=""></button>
+
+	</div>
+	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Venus_boton" class="btn-dios transparent" on:click={()=> venus = true}
 			><img src="../img/dioses romanos_btn/Venus_btn.webp" alt=""></button>
 
@@ -279,11 +284,6 @@
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Baco_boton" class="btn-dios transparent" on:click={()=> baco = true}
 			><img src="../img/dioses romanos_btn/Baco_btn.webp" alt=""></button>
-
-	</div>
-	<div class="btn_dioses">
-		<button href="javascript:void(0)" id="Neptuno_boton" class="btn-dios transparent" on:click={()=> neptuno = true}
-			><img src="../img/dioses romanos_btn/Neptuno_btn.webp" alt=""></button>
 
 	</div>
 </nav>

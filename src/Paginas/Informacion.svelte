@@ -48,7 +48,7 @@
             <div class="row">
                 <div class="col s12 center-align">
                     <h4 class="about-tit">Dioses de Roma</h4>
-                    <p class="about-version">Versión 4.0.0.</p>
+                    <p class="about-version">Versión 7.0.0.</p>
                     <p class="about-txt">La app para aprender los dioses de la mitología clásica.</p>
 
                     <p class="about-txt">
@@ -83,6 +83,7 @@
                         <li> 1- Añadir más dioses</li>
                         <li> 2- Añadir buscador</li>
                         <li> 3- Mejoras generales en el diseño</li>
+                        <li> 4- Dioses de Roma PRO</li>
                     </ul>
                     <br>
 

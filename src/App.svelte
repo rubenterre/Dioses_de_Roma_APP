@@ -26,9 +26,9 @@
     },
     {
       k: 4,
-      icon: 'share',
-      label: 'COMPARTIR',
-      url: '/compartir'
+      icon: 'book',
+      label: 'MITOS',
+      url: '/mitos'
     }
   ];
   let keyedTabsActive = keyedTabs[2];
@@ -37,7 +37,6 @@
 
 <main>
 
-    <!-- navbar bottom 
     <nav class="navbarbaja">
       <div class="nav-fixed">
           <a href="/" use:link class="brand-logo center"><img src="img/Icon_menu/inicio.svg" alt="inicio" width="80%"></a>
@@ -52,7 +51,8 @@
 
       </div>
   </nav>
-  -->
+  
+<!-- 
 
   <TabBar tabs={keyedTabs} let:tab key={tab => tab.k} bind:active={keyedTabsActive}>
     <a href="{tab.url}" use:link>
@@ -62,6 +62,7 @@
     </Tab>
     </a>
   </TabBar>
+-->
 
 <Router {routes} />
 
@@ -96,5 +97,23 @@
 a{
   color: transparent;
 }
+
+/* barra baja */
+.navbarbaja {
+    background-color: #DFD7C3;
+    overflow: hidden;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    z-index: 999;
+    margin: 0 auto;
+    padding: 5px;
+    border-radius: 30px 30px 0px 0px;
+    -moz-border-radius: 30px 30px 0px 0px;
+    -webkit-border-radius: 30px 30px 0px 0px;
+    border: 0px solid;
+
+}
+
 
 </style>
