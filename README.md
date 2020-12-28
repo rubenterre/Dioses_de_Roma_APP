@@ -1,11 +1,11 @@
 Política de privacidad
 
-Dioses de Roma ("Dioses", "nosotros") es comprometida con la protección de su privacidad.
+Dioses de Roma ("Dioses", "nosotros") estamos comprometidos con la protección de su privacidad.
 
 Nosotros creamos esta Política de Privacidad para mostrar nuestro compromiso de proteger su privacidad mientras usted utiliza cualquiera de nuestros productos y cualquier servicio disponibles a través o conectados a nuestras Apps, como nuestro sitio web (los "Servicios de Suscripción"). Su uso de Apps y Servicios de Suscripción está cubierto por esta Política de Privacidad y Términos de Uso.
 
 
-1. QUÉ ES POLÍTICA CONTEMPLA
+1. QUÉ ES POLÍTICA DE PRIVACIDAD
 
 Esta Política de Privacidad se aplica sólo a las Apps y a los Servicios de Suscripción, y no se aplica a ninguna otra aplicación o servicio de suscripción que se pueda acceder a través de las Apps, incluyendo pero no limitado a las aplicaciones y servicios de suscripción a los que se accede a través de anuncios o conectados a servicios terceros, cada uno de los cuales pueden utilizar colecta de datos, almacenamiento y/o prácticas y políticas que difieren considerablemente de esta Política de Privacidad.
 
