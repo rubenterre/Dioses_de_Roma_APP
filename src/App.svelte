@@ -14,9 +14,9 @@
   let keyedTabs = [
     {
       k: 3,
-      icon: 'search',
-      label: 'BUSCAR',
-      url:'/buscar'
+      icon: 'settings',
+      label: 'AJUSTES',
+      url: '/ajustes'
     },
     {
       k: 1,
@@ -25,13 +25,13 @@
       url: '/'
     },
     {
-      k: 4,
-      icon: 'share',
-      label: 'COMPARTE',
-      url: '/compartir'
+      k: 2,
+      icon: 'search',
+      label: 'BUSCAR',
+      url:'/buscar'
     }
   ];
-  let keyedTabsActive = keyedTabs[2];
+  let keyedTabsActive = keyedTabs[1];
 
 </script>
 

@@ -1,6 +1,7 @@
 import Inicio from './Paginas/Inicio.svelte'
 import Ajustes from './Paginas/Ajustes.svelte'
 import Informacion from './Paginas/Informacion.svelte'
+import Buscar from './Paginas/Buscar.svelte'
 import ApoloPerfil from './Paginas/ApoloPerfil.svelte'
 import JupiterPerfil from './Paginas/JupiterPerfil.svelte'
 import JunoPerfil from './Paginas/JunoPerfil.svelte'
@@ -20,6 +21,7 @@ const routes = {
     '/': Inicio,
     '/ajustes': Ajustes,
     '/informacion': Informacion,
+    '/buscar': Buscar,
     '/ApoloPerfil': ApoloPerfil,
     '/JupiterPerfil': JupiterPerfil,
     '/JunoPerfil': JunoPerfil,
