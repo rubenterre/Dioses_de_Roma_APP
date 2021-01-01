@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Shape</title>
+    <defs>
+        <filter x="-15.4%" y="-12.1%" width="130.8%" height="124.2%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Mitos_criaturas_heroes" transform="translate(-138.000000, -365.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <g id="Filtros" transform="translate(25.000000, 351.000000)">
+                <g id="btn_mitos" filter="url(#filter-1)" transform="translate(97.000000, 0.000000)">
+                    <path d="M59.1890625,23.0853836 L40.878125,16.1569208 C40.3122606,15.9476931 39.6885207,15.9476931 39.1226563,16.1569208 L20.8109375,23.0853836 C20.3231686,23.2655807 20,23.7247341 20,24.2376915 L20,27.0769228 C20,27.756923 20.559375,28.3076923 21.25,28.3076923 L58.75,28.3076923 C59.440625,28.3076923 60,27.756923 60,27.0769228 L60,24.2376915 C60,23.7246145 59.6765625,23.2653837 59.1890625,23.0853836 Z M25.5677656,31.3846154 L25.5677656,43.8388278 L24.3223443,43.8388278 C23.6342491,43.8388278 23.0769231,44.3961538 23.0769231,45.0842491 L23.0769231,48.8205128 L57.9487179,48.8205128 L57.9487179,45.0842491 C57.9487179,44.3961538 57.3913919,43.8388278 56.7032967,43.8388278 L55.4578755,43.8388278 L55.4578755,31.3846154 L50.4761905,31.3846154 L50.4761905,43.8388278 L43.003663,43.8388278 L43.003663,31.3846154 L38.021978,31.3846154 L38.021978,43.8388278 L30.5494505,43.8388278 L30.5494505,31.3846154 L25.5677656,31.3846154 Z M58.75,50.8717949 L21.25,50.8717949 C20.559375,50.8717949 20,51.4455128 20,52.1538462 L20,54.7179487 C20,55.4262821 20.559375,56 21.25,56 L58.75,56 C59.440625,56 60,55.4262821 60,54.7179487 L60,52.1538462 C60,51.4455128 59.440625,50.8717949 58.75,50.8717949 Z" id="Shape"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

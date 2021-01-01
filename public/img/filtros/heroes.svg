@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="49px" height="48px" viewBox="0 0 49 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>sword_1_</title>
+    <defs>
+        <filter x="-15.4%" y="-12.1%" width="130.8%" height="124.2%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Mitos_criaturas_heroes" transform="translate(-229.000000, -365.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <g id="Filtros" transform="translate(25.000000, 351.000000)">
+                <g id="btn_heroes" filter="url(#filter-1)" transform="translate(191.000000, 0.000000)">
+                    <g id="espada" transform="translate(17.000000, 16.000000)">
+                        <path d="M17.7334575,32.6747364 L16.0033641,34.3615775 L12.3189059,30.8004686 L7.44901331,35.5486138 C7.70532344,36.7356501 7.35289701,38.0163998 6.42377277,38.922296 C4.94998949,40.3592347 2.57912074,40.3592347 1.10533746,38.922296 C-0.368445819,37.4853573 -0.368445819,35.1737602 1.10533746,33.7368216 C2.0344617,32.8309254 3.34805114,32.4873096 4.56552428,32.7684498 L9.43541685,28.0203046 L5.78299743,24.39672 L7.51309084,22.709879 L17.7334575,32.6747364 Z M30.3887704,4.21710269 L11.1334715,25.2401406 L12.8635649,26.9269816 L33.464492,6.8410777 L34.0411898,7.40335806 L13.4402627,27.4580242 L15.1703561,29.1448653 L36.7324463,10.3709488 L41.025641,0 L30.3887704,4.21710269 Z" id="sword_1_"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
