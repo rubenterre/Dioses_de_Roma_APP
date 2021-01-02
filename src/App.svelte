@@ -73,10 +73,9 @@
 
 :global(body) {
     background: url(../img/Fondo.png);
-    background-repeat: no-repeat;
+    background-repeat: repeat;
     background-size: cover;
     background-color: #111518;
-    height: 100%;
 }
 
 :global(.menu_abajo){
