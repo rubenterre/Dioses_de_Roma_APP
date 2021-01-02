@@ -1,5 +1,4 @@
 <script>
-
     import {
         link
     } from 'svelte-spa-router'
@@ -154,55 +153,53 @@
     if (selectedCheckbox = []) {
         todos()
     }
-
-
 </script>
 <div>
 
-    <Header/>
+    <Header />
 
     <div class="corpo center">
         <div class="usuario">
             <div class="container">
-                    <div class="bannerBuscar">
-                        <h4 class="banner_tit">BUSCARDOR MITOLÓGICO</h4>
-                        <p class="banner_txt">Selecciona un filtro para afinar la búsqueda</p>
-                    </div>
+                <div class="bannerBuscar">
+                    <h4 class="banner_tit">BUSCARDOR MITOLÓGICO</h4>
+                    <p class="banner_txt">Selecciona un filtro para afinar la búsqueda</p>
+                </div>
             </div>
         </div>
         <div class="container">
             <div id="BtnContainer" class="col s12">
                 <div class="col s3 todos">
-                    <button on:click={()=> todos()} class:selected="{current === 'TODOS'}"  class="btn_filtro"><img class="center-align" width="90%"
-                            src="img/filtros/todos.svg"><span>TODOS</span></button>
+                    <button on:click={()=> todos()} class:selected="{current === 'TODOS'}" class="btn_filtro"><img
+                            class="center-align" width="90%" src="img/filtros/todos.svg"><span>TODOS</span></button>
                 </div>
                 <div class="col s3 arte">
-                    <button on:click={()=> mitos()} class:selected="{current === 'MITOS'}" class="btn_filtro"><img class="center-align" width="90%"
-                            src="img/filtros/mitos.svg"><span>MITOS</span></button>
+                    <button on:click={()=> mitos()} class:selected="{current === 'MITOS'}" class="btn_filtro"><img
+                            class="center-align" width="90%" src="img/filtros/mitos.svg"><span>MITOS</span></button>
                 </div>
                 <div class="col s3 cidades">
-                    <button on:click={()=> heroes()} class:selected="{current === 'HEROES'}" class="btn_filtro"><img class="center-align" width="90%"
-                            src="img/filtros/heroes.svg"><span>HÉROES</span></button>
+                    <button on:click={()=> heroes()} class:selected="{current === 'HEROES'}" class="btn_filtro"><img
+                            class="center-align" width="90%" src="img/filtros/heroes.svg"><span>HÉROES</span></button>
                 </div>
                 <div class="col s3">
-                    <button on:click={()=> seres()} class:selected="{current === 'SERES'}" class="btn_filtro"><img class="center-align" width="90%"
-                            src="img/filtros/seres.svg"><span>SERES</span></button>
+                    <button on:click={()=> seres()} class:selected="{current === 'SERES'}" class="btn_filtro"><img
+                            class="center-align" width="90%" src="img/filtros/seres.svg"><span>SERES</span></button>
                 </div>
             </div>
             <div class="tarjetas">
                 <div class="row">
                     <!-- Menu filtro -->
-    
+
                     {#if visibleFiltro}
                     {#each selectedCheckbox as tarjetas }
-                        
+                        <!-- 
                         <div class="col s12 m6" transition:fade="{{delay: 250, duration: 300}}">
                             <div class="card">
                                 <div class="card-image waves-effect waves-block waves-light">
                                   <img class="activator" src="img/tarjetas_buscar/{tarjetas.imagen}.webp">
                                 </div>
                                 <div class="card-content">
-                                  <span class="card-title activator white-text">{tarjetas.nombre}<i class="material-icons right">chevron_right</i></span>
+                                    <span class="card-title activator white-text">{tarjetas.nombre}<i class="material-icons right">chevron_right</i></span>
                                   <p class="etiquetas">{tarjetas.etiqueta}</p>
                                 </div>
                                 <div class="card-reveal">
@@ -210,7 +207,22 @@
                                   <p class="grey-text text-darken-4" >{tarjetas.descripcion}</p>
                                 </div>
                               </div>
-                        </div>
+                        </div> 
+                        -->
+
+                        <div class="col s12" transition:fade="{{delay: 250, duration: 300}}">
+                            <div class="card col s12">
+                                <div class="card-content col s10">
+                                    <span class="card-title activator white-text">{tarjetas.nombre}</span>
+                                  <p class="etiquetas">{tarjetas.etiqueta}</p>
+                                  <p class="descripcion">{tarjetas.descripcion}</p>
+                                </div>
+                                <div class="col s2 flecha">
+                                    <i class="material-icons center">chevron_right</i>
+                                </div>
+                              </div>
+                        </div> 
+                        
                     {/each}
                     {/if}
                 </div>
@@ -312,6 +324,9 @@
         border-radius: 8px;
         color: white;
         font-size: 12px;
+        display: inline-flex;
+        padding-right: 0px;
+        margin-right: 0px;
     }
 
     .card-title{
@@ -344,6 +359,23 @@
         text-transform: uppercase;
         font-weight: 100;
         font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    }
+
+    .descripcion{
+        text-align: left;
+        padding-top: 10px;
+    }
+
+    .flecha{
+        background-color: #DFD7C3;
+        vertical-align: middle;
+        border-bottom-right-radius: 7px;
+        border-top-right-radius: 7px;
+    }
+
+    .flecha i{
+        vertical-align: middle;
+        padding-top: 70px;
     }
 
     .tarjetas{

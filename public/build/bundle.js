@@ -10475,7 +10475,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (196:20) {#if visibleFiltro}
+    // (193:20) {#if visibleFiltro}
     function create_if_block$5(ctx) {
     	let each_1_anchor;
     	let current;
@@ -10564,147 +10564,112 @@ var app = (function () {
     		block,
     		id: create_if_block$5.name,
     		type: "if",
-    		source: "(196:20) {#if visibleFiltro}",
+    		source: "(193:20) {#if visibleFiltro}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (197:20) {#each selectedCheckbox as tarjetas }
+    // (194:20) {#each selectedCheckbox as tarjetas }
     function create_each_block(ctx) {
-    	let div4;
     	let div3;
+    	let div2;
     	let div0;
-    	let img;
-    	let img_src_value;
+    	let span;
+    	let t0_value = /*tarjetas*/ ctx[7].nombre + "";
     	let t0;
-    	let div1;
-    	let span0;
-    	let t1_value = /*tarjetas*/ ctx[7].nombre + "";
     	let t1;
-    	let i0;
-    	let t3;
     	let p0;
-    	let t4_value = /*tarjetas*/ ctx[7].etiqueta + "";
+    	let t2_value = /*tarjetas*/ ctx[7].etiqueta + "";
+    	let t2;
+    	let t3;
+    	let p1;
+    	let t4_value = /*tarjetas*/ ctx[7].descripcion + "";
     	let t4;
     	let t5;
-    	let div2;
-    	let span1;
-    	let t6_value = /*tarjetas*/ ctx[7].nombre + "";
-    	let t6;
-    	let i1;
-    	let t8;
-    	let p1;
-    	let t9_value = /*tarjetas*/ ctx[7].descripcion + "";
-    	let t9;
-    	let t10;
-    	let div4_transition;
+    	let div1;
+    	let i;
+    	let t7;
+    	let div3_transition;
     	let current;
 
     	const block = {
     		c: function create() {
-    			div4 = element("div");
     			div3 = element("div");
+    			div2 = element("div");
     			div0 = element("div");
-    			img = element("img");
-    			t0 = space();
-    			div1 = element("div");
-    			span0 = element("span");
-    			t1 = text(t1_value);
-    			i0 = element("i");
-    			i0.textContent = "chevron_right";
-    			t3 = space();
+    			span = element("span");
+    			t0 = text(t0_value);
+    			t1 = space();
     			p0 = element("p");
+    			t2 = text(t2_value);
+    			t3 = space();
+    			p1 = element("p");
     			t4 = text(t4_value);
     			t5 = space();
-    			div2 = element("div");
-    			span1 = element("span");
-    			t6 = text(t6_value);
-    			i1 = element("i");
-    			i1.textContent = "close";
-    			t8 = space();
-    			p1 = element("p");
-    			t9 = text(t9_value);
-    			t10 = space();
-    			attr_dev(img, "class", "activator svelte-hezr10");
-    			if (img.src !== (img_src_value = "img/tarjetas_buscar/" + /*tarjetas*/ ctx[7].imagen + ".webp")) attr_dev(img, "src", img_src_value);
-    			add_location(img, file$m, 201, 34, 8056);
-    			attr_dev(div0, "class", "card-image waves-effect waves-block waves-light svelte-hezr10");
-    			add_location(div0, file$m, 200, 32, 7960);
-    			attr_dev(i0, "class", "material-icons right");
-    			add_location(i0, file$m, 204, 97, 8324);
-    			attr_dev(span0, "class", "card-title activator white-text svelte-hezr10");
-    			add_location(span0, file$m, 204, 34, 8261);
-    			attr_dev(p0, "class", "etiquetas svelte-hezr10");
-    			add_location(p0, file$m, 205, 34, 8415);
-    			attr_dev(div1, "class", "card-content");
-    			add_location(div1, file$m, 203, 32, 8200);
-    			attr_dev(i1, "class", "material-icons right");
-    			add_location(i1, file$m, 208, 100, 8657);
-    			attr_dev(span1, "class", "card-title grey-text text-darken-4 svelte-hezr10");
-    			add_location(span1, file$m, 208, 34, 8591);
-    			attr_dev(p1, "class", "grey-text text-darken-4 svelte-hezr10");
-    			add_location(p1, file$m, 209, 34, 8740);
-    			attr_dev(div2, "class", "card-reveal svelte-hezr10");
-    			add_location(div2, file$m, 207, 32, 8531);
-    			attr_dev(div3, "class", "card svelte-hezr10");
-    			add_location(div3, file$m, 199, 28, 7909);
-    			attr_dev(div4, "class", "col s12 m6");
-    			add_location(div4, file$m, 198, 24, 7808);
+    			div1 = element("div");
+    			i = element("i");
+    			i.textContent = "chevron_right";
+    			t7 = space();
+    			attr_dev(span, "class", "card-title activator white-text svelte-27uimn");
+    			add_location(span, file$m, 215, 36, 9176);
+    			attr_dev(p0, "class", "etiquetas svelte-27uimn");
+    			add_location(p0, file$m, 216, 34, 9281);
+    			attr_dev(p1, "class", "descripcion svelte-27uimn");
+    			add_location(p1, file$m, 217, 34, 9360);
+    			attr_dev(div0, "class", "card-content col s10");
+    			add_location(div0, file$m, 214, 32, 9105);
+    			attr_dev(i, "class", "material-icons center svelte-27uimn");
+    			add_location(i, file$m, 220, 36, 9545);
+    			attr_dev(div1, "class", "col s2 flecha svelte-27uimn");
+    			add_location(div1, file$m, 219, 32, 9481);
+    			attr_dev(div2, "class", "card col s12 svelte-27uimn");
+    			add_location(div2, file$m, 213, 28, 9046);
+    			attr_dev(div3, "class", "col s12");
+    			add_location(div3, file$m, 212, 24, 8948);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, div4, anchor);
-    			append_dev(div4, div3);
-    			append_dev(div3, div0);
-    			append_dev(div0, img);
-    			append_dev(div3, t0);
-    			append_dev(div3, div1);
-    			append_dev(div1, span0);
-    			append_dev(span0, t1);
-    			append_dev(span0, i0);
-    			append_dev(div1, t3);
-    			append_dev(div1, p0);
-    			append_dev(p0, t4);
-    			append_dev(div3, t5);
+    			insert_dev(target, div3, anchor);
     			append_dev(div3, div2);
-    			append_dev(div2, span1);
-    			append_dev(span1, t6);
-    			append_dev(span1, i1);
-    			append_dev(div2, t8);
-    			append_dev(div2, p1);
-    			append_dev(p1, t9);
-    			append_dev(div4, t10);
+    			append_dev(div2, div0);
+    			append_dev(div0, span);
+    			append_dev(span, t0);
+    			append_dev(div0, t1);
+    			append_dev(div0, p0);
+    			append_dev(p0, t2);
+    			append_dev(div0, t3);
+    			append_dev(div0, p1);
+    			append_dev(p1, t4);
+    			append_dev(div2, t5);
+    			append_dev(div2, div1);
+    			append_dev(div1, i);
+    			append_dev(div3, t7);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (!current || dirty & /*selectedCheckbox*/ 2 && img.src !== (img_src_value = "img/tarjetas_buscar/" + /*tarjetas*/ ctx[7].imagen + ".webp")) {
-    				attr_dev(img, "src", img_src_value);
-    			}
-
-    			if ((!current || dirty & /*selectedCheckbox*/ 2) && t1_value !== (t1_value = /*tarjetas*/ ctx[7].nombre + "")) set_data_dev(t1, t1_value);
-    			if ((!current || dirty & /*selectedCheckbox*/ 2) && t4_value !== (t4_value = /*tarjetas*/ ctx[7].etiqueta + "")) set_data_dev(t4, t4_value);
-    			if ((!current || dirty & /*selectedCheckbox*/ 2) && t6_value !== (t6_value = /*tarjetas*/ ctx[7].nombre + "")) set_data_dev(t6, t6_value);
-    			if ((!current || dirty & /*selectedCheckbox*/ 2) && t9_value !== (t9_value = /*tarjetas*/ ctx[7].descripcion + "")) set_data_dev(t9, t9_value);
+    			if ((!current || dirty & /*selectedCheckbox*/ 2) && t0_value !== (t0_value = /*tarjetas*/ ctx[7].nombre + "")) set_data_dev(t0, t0_value);
+    			if ((!current || dirty & /*selectedCheckbox*/ 2) && t2_value !== (t2_value = /*tarjetas*/ ctx[7].etiqueta + "")) set_data_dev(t2, t2_value);
+    			if ((!current || dirty & /*selectedCheckbox*/ 2) && t4_value !== (t4_value = /*tarjetas*/ ctx[7].descripcion + "")) set_data_dev(t4, t4_value);
     		},
     		i: function intro(local) {
     			if (current) return;
 
     			add_render_callback(() => {
-    				if (!div4_transition) div4_transition = create_bidirectional_transition(div4, fade, { delay: 250, duration: 300 }, true);
-    				div4_transition.run(1);
+    				if (!div3_transition) div3_transition = create_bidirectional_transition(div3, fade, { delay: 250, duration: 300 }, true);
+    				div3_transition.run(1);
     			});
 
     			current = true;
     		},
     		o: function outro(local) {
-    			if (!div4_transition) div4_transition = create_bidirectional_transition(div4, fade, { delay: 250, duration: 300 }, false);
-    			div4_transition.run(0);
+    			if (!div3_transition) div3_transition = create_bidirectional_transition(div3, fade, { delay: 250, duration: 300 }, false);
+    			div3_transition.run(0);
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(div4);
-    			if (detaching && div4_transition) div4_transition.end();
+    			if (detaching) detach_dev(div3);
+    			if (detaching && div3_transition) div3_transition.end();
     		}
     	};
 
@@ -10712,7 +10677,7 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(197:20) {#each selectedCheckbox as tarjetas }",
+    		source: "(194:20) {#each selectedCheckbox as tarjetas }",
     		ctx
     	});
 
@@ -10809,72 +10774,72 @@ var app = (function () {
     			div9 = element("div");
     			div8 = element("div");
     			if (if_block) if_block.c();
-    			attr_dev(h4, "class", "banner_tit svelte-hezr10");
-    			add_location(h4, file$m, 167, 24, 6046);
-    			attr_dev(p, "class", "banner_txt svelte-hezr10");
-    			add_location(p, file$m, 168, 24, 6119);
-    			attr_dev(div0, "class", "bannerBuscar svelte-hezr10");
-    			add_location(div0, file$m, 166, 20, 5995);
+    			attr_dev(h4, "class", "banner_tit svelte-27uimn");
+    			add_location(h4, file$m, 164, 20, 6036);
+    			attr_dev(p, "class", "banner_txt svelte-27uimn");
+    			add_location(p, file$m, 165, 20, 6105);
+    			attr_dev(div0, "class", "bannerBuscar svelte-27uimn");
+    			add_location(div0, file$m, 163, 16, 5989);
     			attr_dev(div1, "class", "container");
-    			add_location(div1, file$m, 165, 12, 5951);
+    			add_location(div1, file$m, 162, 12, 5949);
     			attr_dev(div2, "class", "usuario");
-    			add_location(div2, file$m, 164, 8, 5917);
+    			add_location(div2, file$m, 161, 8, 5915);
     			attr_dev(img0, "class", "center-align");
     			attr_dev(img0, "width", "90%");
     			if (img0.src !== (img0_src_value = "img/filtros/todos.svg")) attr_dev(img0, "src", img0_src_value);
-    			add_location(img0, file$m, 175, 111, 6489);
-    			attr_dev(span0, "class", "svelte-hezr10");
-    			add_location(span0, file$m, 176, 56, 6583);
-    			attr_dev(button0, "class", "btn_filtro svelte-hezr10");
+    			add_location(img0, file$m, 172, 110, 6470);
+    			attr_dev(span0, "class", "svelte-27uimn");
+    			add_location(span0, file$m, 173, 89, 6564);
+    			attr_dev(button0, "class", "btn_filtro svelte-27uimn");
     			toggle_class(button0, "selected", /*current*/ ctx[0] === "TODOS");
-    			add_location(button0, file$m, 175, 20, 6398);
+    			add_location(button0, file$m, 172, 20, 6380);
     			attr_dev(div3, "class", "col s3 todos");
-    			add_location(div3, file$m, 174, 16, 6351);
+    			add_location(div3, file$m, 171, 16, 6333);
     			attr_dev(img1, "class", "center-align");
     			attr_dev(img1, "width", "90%");
     			if (img1.src !== (img1_src_value = "img/filtros/mitos.svg")) attr_dev(img1, "src", img1_src_value);
-    			add_location(img1, file$m, 179, 110, 6786);
-    			attr_dev(span1, "class", "svelte-hezr10");
-    			add_location(span1, file$m, 180, 56, 6880);
-    			attr_dev(button1, "class", "btn_filtro svelte-hezr10");
+    			add_location(img1, file$m, 176, 110, 6767);
+    			attr_dev(span1, "class", "svelte-27uimn");
+    			add_location(span1, file$m, 177, 89, 6861);
+    			attr_dev(button1, "class", "btn_filtro svelte-27uimn");
     			toggle_class(button1, "selected", /*current*/ ctx[0] === "MITOS");
-    			add_location(button1, file$m, 179, 20, 6696);
+    			add_location(button1, file$m, 176, 20, 6677);
     			attr_dev(div4, "class", "col s3 arte");
-    			add_location(div4, file$m, 178, 16, 6650);
+    			add_location(div4, file$m, 175, 16, 6631);
     			attr_dev(img2, "class", "center-align");
     			attr_dev(img2, "width", "90%");
     			if (img2.src !== (img2_src_value = "img/filtros/heroes.svg")) attr_dev(img2, "src", img2_src_value);
-    			add_location(img2, file$m, 183, 112, 7088);
-    			attr_dev(span2, "class", "svelte-hezr10");
-    			add_location(span2, file$m, 184, 57, 7183);
-    			attr_dev(button2, "class", "btn_filtro svelte-hezr10");
+    			add_location(img2, file$m, 180, 112, 7069);
+    			attr_dev(span2, "class", "svelte-27uimn");
+    			add_location(span2, file$m, 181, 90, 7164);
+    			attr_dev(button2, "class", "btn_filtro svelte-27uimn");
     			toggle_class(button2, "selected", /*current*/ ctx[0] === "HEROES");
-    			add_location(button2, file$m, 183, 20, 6996);
+    			add_location(button2, file$m, 180, 20, 6977);
     			attr_dev(div5, "class", "col s3 cidades");
-    			add_location(div5, file$m, 182, 16, 6947);
+    			add_location(div5, file$m, 179, 16, 6928);
     			attr_dev(img3, "class", "center-align");
     			attr_dev(img3, "width", "90%");
     			if (img3.src !== (img3_src_value = "img/filtros/seres.svg")) attr_dev(img3, "src", img3_src_value);
-    			add_location(img3, file$m, 187, 110, 7382);
-    			attr_dev(span3, "class", "svelte-hezr10");
-    			add_location(span3, file$m, 188, 56, 7476);
-    			attr_dev(button3, "class", "btn_filtro svelte-hezr10");
+    			add_location(img3, file$m, 184, 110, 7363);
+    			attr_dev(span3, "class", "svelte-27uimn");
+    			add_location(span3, file$m, 185, 89, 7457);
+    			attr_dev(button3, "class", "btn_filtro svelte-27uimn");
     			toggle_class(button3, "selected", /*current*/ ctx[0] === "SERES");
-    			add_location(button3, file$m, 187, 20, 7292);
+    			add_location(button3, file$m, 184, 20, 7273);
     			attr_dev(div6, "class", "col s3");
-    			add_location(div6, file$m, 186, 16, 7251);
+    			add_location(div6, file$m, 183, 16, 7232);
     			attr_dev(div7, "id", "BtnContainer");
-    			attr_dev(div7, "class", "col s12 svelte-hezr10");
-    			add_location(div7, file$m, 173, 12, 6295);
+    			attr_dev(div7, "class", "col s12 svelte-27uimn");
+    			add_location(div7, file$m, 170, 12, 6277);
     			attr_dev(div8, "class", "row");
-    			add_location(div8, file$m, 192, 16, 7597);
-    			attr_dev(div9, "class", "tarjetas svelte-hezr10");
-    			add_location(div9, file$m, 191, 12, 7558);
+    			add_location(div8, file$m, 189, 16, 7578);
+    			attr_dev(div9, "class", "tarjetas svelte-27uimn");
+    			add_location(div9, file$m, 188, 12, 7539);
     			attr_dev(div10, "class", "container");
-    			add_location(div10, file$m, 172, 8, 6259);
-    			attr_dev(div11, "class", "corpo center svelte-hezr10");
-    			add_location(div11, file$m, 163, 4, 5882);
-    			add_location(div12, file$m, 159, 0, 5856);
+    			add_location(div10, file$m, 169, 8, 6241);
+    			attr_dev(div11, "class", "corpo center svelte-27uimn");
+    			add_location(div11, file$m, 160, 4, 5880);
+    			add_location(div12, file$m, 156, 0, 5853);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
