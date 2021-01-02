@@ -1,4 +1,4 @@
-body{background:url(../img/Fondo.png);background-repeat:repeat;background-size:cover;background-color:#111518}.menu_abajo{background-color:white;bottom:0px;position:fixed;width:100%;display:inline-flex;justify-content:center}.menu_abajo li{color:black}a.svelte-10jhy72{color:transparent}
+body{background:url(../img/Fondo.png);background-repeat:no-repeat;background-size:contain;width:100%;background-color:#111518}.menu_abajo{background-color:white;bottom:0px;position:fixed;width:100%;display:inline-flex;justify-content:center}.menu_abajo li{color:black}a.svelte-1tp8lho{color:transparent}
 @import url('https://fonts.googleapis.com/css2?family=Lora&display=swap');
 
 body{

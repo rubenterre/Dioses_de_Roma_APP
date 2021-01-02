@@ -17877,7 +17877,7 @@ var app = (function () {
     			a = element("a");
     			create_component(tab.$$.fragment);
     			attr_dev(a, "href", a_href_value = /*tab*/ ctx[3].url);
-    			attr_dev(a, "class", "svelte-10jhy72");
+    			attr_dev(a, "class", "svelte-1tp8lho");
     			add_location(a, file$G, 57, 4, 1314);
     		},
     		m: function mount(target, anchor) {

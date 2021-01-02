@@ -73,8 +73,9 @@
 
 :global(body) {
     background: url(../img/Fondo.png);
-    background-repeat: repeat;
-    background-size: cover;
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 100%;
     background-color: #111518;
 }
 
