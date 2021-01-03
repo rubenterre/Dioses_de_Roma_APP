@@ -226,7 +226,7 @@
 
 <Header/>
 
-<nav class="botones_dioses">
+<nav class="botones_dioses" transition:blur="{{amount: 10}}">
 	<div class="btn_dioses">
 		<button href="javascript:void(0)" id="Jupiter_boton" class="btn-dios transparent" on:click={()=> jupiter = true}
 			><img src="../img/dioses romanos_btn/Jupiter_btn.webp" alt=""></button>

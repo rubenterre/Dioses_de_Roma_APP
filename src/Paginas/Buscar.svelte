@@ -71,7 +71,7 @@
             nombre: 'Hércules',
             imagen: 'Tarjeta_Heroes_Hercules',
             etiqueta: 'heroes',
-            descripcion: 'Es el más célebre de los héroes grecolatinos y la fuerza es su atributo característico.'
+            descripcion: 'Es el más célebre de los héroes grecolatinos y la fuerza es su atributo característico. Recorrió en solitario numerosos lugares, para liberar el mundo de monstruos, delitos y asesinatos.'
         },
         {
             nombre: 'Jasón',
@@ -158,7 +158,7 @@
 
     <Header />
 
-    <div class="corpo center">
+    <div class="corpo center" transition:fade="{{delay: 250, duration: 300}}">
         <div class="usuario">
             <div class="container">
                 <div class="bannerBuscar">
@@ -218,7 +218,7 @@
                                   <p class="descripcion">{tarjetas.descripcion}</p>
                                 </div>
                                 <div class="col s2 flecha">
-                                    <i class="material-icons center">chevron_right</i>
+                                    <img src="img/flecha.png" alt="">
                                 </div>
                               </div>
                         </div> 
@@ -321,9 +321,9 @@
         background-color: transparent;
         width: 100%;
         border: 3px solid #DFD7C3;
-        border-radius: 8px;
+        border-radius: 12px;
         color: white;
-        font-size: 12px;
+        font-size: 14px;
         display: inline-flex;
         padding-right: 0px;
         margin-right: 0px;
@@ -373,10 +373,6 @@
         border-top-right-radius: 7px;
     }
 
-    .flecha i{
-        vertical-align: middle;
-        padding-top: 70px;
-    }
 
     .tarjetas{
         margin-bottom: 100px;

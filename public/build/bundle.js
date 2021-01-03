@@ -7890,18 +7890,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 429, 8, 10976);
+    			add_location(div0, file$j, 429, 8, 11009);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 433, 39, 11078);
+    			add_location(h4, file$j, 433, 39, 11111);
     			attr_dev(a, "href", "/VenusPerfil");
-    			add_location(a, file$j, 433, 6, 11045);
+    			add_location(a, file$j, 433, 6, 11078);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 432, 5, 11030);
+    			add_location(button, file$j, 432, 5, 11063);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 428, 7, 10912);
+    			add_location(div1, file$j, 428, 7, 10945);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 427, 6, 10846);
+    			add_location(div2, file$j, 427, 6, 10879);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -7985,18 +7985,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 418, 8, 10641);
+    			add_location(div0, file$j, 418, 8, 10674);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 422, 38, 10741);
+    			add_location(h4, file$j, 422, 38, 10774);
     			attr_dev(a, "href", "/BacoPerfil");
-    			add_location(a, file$j, 422, 6, 10709);
+    			add_location(a, file$j, 422, 6, 10742);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 421, 5, 10694);
+    			add_location(button, file$j, 421, 5, 10727);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 417, 7, 10577);
+    			add_location(div1, file$j, 417, 7, 10610);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 416, 6, 10511);
+    			add_location(div2, file$j, 416, 6, 10544);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8080,18 +8080,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 407, 8, 10296);
+    			add_location(div0, file$j, 407, 8, 10329);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 411, 39, 10398);
+    			add_location(h4, file$j, 411, 39, 10431);
     			attr_dev(a, "href", "/DianaPerfil");
-    			add_location(a, file$j, 411, 6, 10365);
+    			add_location(a, file$j, 411, 6, 10398);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 410, 5, 10350);
+    			add_location(button, file$j, 410, 5, 10383);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 406, 7, 10232);
+    			add_location(div1, file$j, 406, 7, 10265);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 405, 6, 10166);
+    			add_location(div2, file$j, 405, 6, 10199);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8175,18 +8175,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 396, 8, 9946);
+    			add_location(div0, file$j, 396, 8, 9979);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 400, 41, 10052);
+    			add_location(h4, file$j, 400, 41, 10085);
     			attr_dev(a, "href", "/MinervaPerfil");
-    			add_location(a, file$j, 400, 6, 10017);
+    			add_location(a, file$j, 400, 6, 10050);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 399, 5, 10002);
+    			add_location(button, file$j, 399, 5, 10035);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 395, 7, 9882);
+    			add_location(div1, file$j, 395, 7, 9915);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 394, 6, 9816);
+    			add_location(div2, file$j, 394, 6, 9849);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8270,18 +8270,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 385, 8, 9597);
+    			add_location(div0, file$j, 385, 8, 9630);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 389, 40, 9700);
+    			add_location(h4, file$j, 389, 40, 9733);
     			attr_dev(a, "href", "/PlutonPerfil");
-    			add_location(a, file$j, 389, 6, 9666);
+    			add_location(a, file$j, 389, 6, 9699);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 388, 5, 9651);
+    			add_location(button, file$j, 388, 5, 9684);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 384, 7, 9533);
+    			add_location(div1, file$j, 384, 7, 9566);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 383, 6, 9467);
+    			add_location(div2, file$j, 383, 6, 9500);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8365,18 +8365,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 374, 8, 9245);
+    			add_location(div0, file$j, 374, 8, 9278);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 378, 42, 9353);
+    			add_location(h4, file$j, 378, 42, 9386);
     			attr_dev(a, "href", "/MercurioPerfil");
-    			add_location(a, file$j, 378, 6, 9317);
+    			add_location(a, file$j, 378, 6, 9350);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 377, 5, 9302);
+    			add_location(button, file$j, 377, 5, 9335);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 373, 7, 9181);
+    			add_location(div1, file$j, 373, 7, 9214);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 372, 6, 9115);
+    			add_location(div2, file$j, 372, 6, 9148);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8460,18 +8460,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 363, 8, 8896);
+    			add_location(div0, file$j, 363, 8, 8929);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 367, 39, 8998);
+    			add_location(h4, file$j, 367, 39, 9031);
     			attr_dev(a, "href", "/MartePerfil");
-    			add_location(a, file$j, 367, 6, 8965);
+    			add_location(a, file$j, 367, 6, 8998);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 366, 5, 8950);
+    			add_location(button, file$j, 366, 5, 8983);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 362, 7, 8832);
+    			add_location(div1, file$j, 362, 7, 8865);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 361, 6, 8766);
+    			add_location(div2, file$j, 361, 6, 8799);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8555,18 +8555,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 352, 8, 8546);
+    			add_location(div0, file$j, 352, 8, 8579);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 356, 41, 8652);
+    			add_location(h4, file$j, 356, 41, 8685);
     			attr_dev(a, "href", "/VulcanoPerfil");
-    			add_location(a, file$j, 356, 6, 8617);
+    			add_location(a, file$j, 356, 6, 8650);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 355, 5, 8602);
+    			add_location(button, file$j, 355, 5, 8635);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 351, 7, 8482);
+    			add_location(div1, file$j, 351, 7, 8515);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 350, 6, 8416);
+    			add_location(div2, file$j, 350, 6, 8449);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8650,18 +8650,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 341, 8, 8198);
+    			add_location(div0, file$j, 341, 8, 8231);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 345, 39, 8300);
+    			add_location(h4, file$j, 345, 39, 8333);
     			attr_dev(a, "href", "/ApoloPerfil");
-    			add_location(a, file$j, 345, 6, 8267);
+    			add_location(a, file$j, 345, 6, 8300);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 344, 5, 8252);
+    			add_location(button, file$j, 344, 5, 8285);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 340, 7, 8134);
+    			add_location(div1, file$j, 340, 7, 8167);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 339, 6, 8068);
+    			add_location(div2, file$j, 339, 6, 8101);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8745,18 +8745,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 330, 8, 7852);
+    			add_location(div0, file$j, 330, 8, 7885);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 334, 39, 7954);
+    			add_location(h4, file$j, 334, 39, 7987);
     			attr_dev(a, "href", "/VenusPerfil");
-    			add_location(a, file$j, 334, 6, 7921);
+    			add_location(a, file$j, 334, 6, 7954);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 333, 5, 7906);
+    			add_location(button, file$j, 333, 5, 7939);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 329, 7, 7788);
+    			add_location(div1, file$j, 329, 7, 7821);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 328, 6, 7722);
+    			add_location(div2, file$j, 328, 6, 7755);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8840,18 +8840,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 319, 8, 7502);
+    			add_location(div0, file$j, 319, 8, 7535);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 323, 41, 7608);
+    			add_location(h4, file$j, 323, 41, 7641);
     			attr_dev(a, "href", "/NeptunoPerfil");
-    			add_location(a, file$j, 323, 6, 7573);
+    			add_location(a, file$j, 323, 6, 7606);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 322, 5, 7558);
+    			add_location(button, file$j, 322, 5, 7591);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 318, 7, 7438);
+    			add_location(div1, file$j, 318, 7, 7471);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 317, 6, 7372);
+    			add_location(div2, file$j, 317, 6, 7405);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -8935,18 +8935,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 308, 8, 7168);
+    			add_location(div0, file$j, 308, 8, 7201);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 312, 38, 7266);
+    			add_location(h4, file$j, 312, 38, 7299);
     			attr_dev(a, "href", "/JunoPerfil");
-    			add_location(a, file$j, 312, 6, 7234);
+    			add_location(a, file$j, 312, 6, 7267);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 311, 5, 7219);
+    			add_location(button, file$j, 311, 5, 7252);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 307, 7, 7104);
+    			add_location(div1, file$j, 307, 7, 7137);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 306, 3, 7038);
+    			add_location(div2, file$j, 306, 3, 7071);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -9030,18 +9030,18 @@ var app = (function () {
     			h4 = element("h4");
     			h4.textContent = "SABER MÁS";
     			attr_dev(div0, "class", "col s12");
-    			add_location(div0, file$j, 297, 5, 6831);
+    			add_location(div0, file$j, 297, 5, 6864);
     			attr_dev(h4, "class", "txt_sabermas svelte-gd3wyx");
-    			add_location(h4, file$j, 301, 41, 6937);
+    			add_location(h4, file$j, 301, 41, 6970);
     			attr_dev(a, "href", "/JupiterPerfil");
-    			add_location(a, file$j, 301, 6, 6902);
+    			add_location(a, file$j, 301, 6, 6935);
     			attr_dev(button, "class", "svelte-gd3wyx");
-    			add_location(button, file$j, 300, 5, 6887);
+    			add_location(button, file$j, 300, 5, 6920);
     			attr_dev(div1, "class", "row");
     			set_style(div1, "margin-bottom", "0px", 1);
-    			add_location(div1, file$j, 296, 4, 6770);
+    			add_location(div1, file$j, 296, 4, 6803);
     			attr_dev(div2, "class", "dioses_card svelte-gd3wyx");
-    			add_location(div2, file$j, 295, 3, 6707);
+    			add_location(div2, file$j, 295, 3, 6740);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -9159,6 +9159,7 @@ var app = (function () {
     	let button11;
     	let img11;
     	let img11_src_value;
+    	let nav_transition;
     	let t12;
     	let section;
     	let div12;
@@ -9265,129 +9266,129 @@ var app = (function () {
     			if (img0.src !== (img0_src_value = "../img/dioses romanos_btn/Jupiter_btn.webp")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "alt", "");
     			attr_dev(img0, "class", "svelte-gd3wyx");
-    			add_location(img0, file$j, 231, 4, 4118);
+    			add_location(img0, file$j, 231, 4, 4151);
     			attr_dev(button0, "href", "javascript:void(0)");
     			attr_dev(button0, "id", "Jupiter_boton");
     			attr_dev(button0, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button0, file$j, 230, 2, 4001);
+    			add_location(button0, file$j, 230, 2, 4034);
     			attr_dev(div0, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div0, file$j, 229, 1, 3974);
+    			add_location(div0, file$j, 229, 1, 4007);
     			if (img1.src !== (img1_src_value = "../img/dioses romanos_btn/Juno_btn.webp")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "alt", "");
     			attr_dev(img1, "class", "svelte-gd3wyx");
-    			add_location(img1, file$j, 234, 110, 4333);
+    			add_location(img1, file$j, 234, 110, 4366);
     			attr_dev(button1, "href", "javascript:void(0)");
     			attr_dev(button1, "id", "Juno_boton");
     			attr_dev(button1, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button1, file$j, 234, 2, 4225);
+    			add_location(button1, file$j, 234, 2, 4258);
     			attr_dev(div1, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div1, file$j, 233, 1, 4198);
+    			add_location(div1, file$j, 233, 1, 4231);
     			if (img2.src !== (img2_src_value = "../img/dioses romanos_btn/Venus_btn.webp")) attr_dev(img2, "src", img2_src_value);
     			attr_dev(img2, "alt", "");
     			attr_dev(img2, "class", "svelte-gd3wyx");
-    			add_location(img2, file$j, 240, 4, 4555);
+    			add_location(img2, file$j, 240, 4, 4588);
     			attr_dev(button2, "href", "javascript:void(0)");
     			attr_dev(button2, "id", "Venus_boton");
     			attr_dev(button2, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button2, file$j, 239, 2, 4442);
+    			add_location(button2, file$j, 239, 2, 4475);
     			attr_dev(div2, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div2, file$j, 238, 1, 4415);
+    			add_location(div2, file$j, 238, 1, 4448);
     			if (img3.src !== (img3_src_value = "../img/dioses romanos_btn/Apolo_btn.webp")) attr_dev(img3, "src", img3_src_value);
     			attr_dev(img3, "alt", "");
     			attr_dev(img3, "class", "svelte-gd3wyx");
-    			add_location(img3, file$j, 245, 4, 4774);
+    			add_location(img3, file$j, 245, 4, 4807);
     			attr_dev(button3, "href", "javascript:void(0)");
     			attr_dev(button3, "id", "Apolo_boton");
     			attr_dev(button3, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button3, file$j, 244, 2, 4661);
+    			add_location(button3, file$j, 244, 2, 4694);
     			attr_dev(div3, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div3, file$j, 243, 1, 4634);
+    			add_location(div3, file$j, 243, 1, 4667);
     			if (img4.src !== (img4_src_value = "../img/dioses romanos_btn/Vulcano_btn.webp")) attr_dev(img4, "src", img4_src_value);
     			attr_dev(img4, "alt", "");
     			attr_dev(img4, "class", "svelte-gd3wyx");
-    			add_location(img4, file$j, 250, 4, 4997);
+    			add_location(img4, file$j, 250, 4, 5030);
     			attr_dev(button4, "href", "javascript:void(0)");
     			attr_dev(button4, "id", "Vulcano_boton");
     			attr_dev(button4, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button4, file$j, 249, 2, 4880);
+    			add_location(button4, file$j, 249, 2, 4913);
     			attr_dev(div4, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div4, file$j, 248, 1, 4853);
+    			add_location(div4, file$j, 248, 1, 4886);
     			if (img5.src !== (img5_src_value = "../img/dioses romanos_btn/Marte_btn.webp")) attr_dev(img5, "src", img5_src_value);
     			attr_dev(img5, "alt", "");
     			attr_dev(img5, "class", "svelte-gd3wyx");
-    			add_location(img5, file$j, 255, 4, 5218);
+    			add_location(img5, file$j, 255, 4, 5251);
     			attr_dev(button5, "href", "javascript:void(0)");
     			attr_dev(button5, "id", "Marte_boton");
     			attr_dev(button5, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button5, file$j, 254, 2, 5105);
+    			add_location(button5, file$j, 254, 2, 5138);
     			attr_dev(div5, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div5, file$j, 253, 1, 5078);
+    			add_location(div5, file$j, 253, 1, 5111);
     			if (img6.src !== (img6_src_value = "../img/dioses romanos_btn/Mercurio_btn.webp")) attr_dev(img6, "src", img6_src_value);
     			attr_dev(img6, "alt", "");
     			attr_dev(img6, "class", "svelte-gd3wyx");
-    			add_location(img6, file$j, 260, 10, 5443);
+    			add_location(img6, file$j, 260, 10, 5476);
     			attr_dev(button6, "href", "javascript:void(0)");
     			attr_dev(button6, "id", "Mercurio_boton");
     			attr_dev(button6, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button6, file$j, 259, 2, 5324);
+    			add_location(button6, file$j, 259, 2, 5357);
     			attr_dev(div6, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div6, file$j, 258, 1, 5297);
+    			add_location(div6, file$j, 258, 1, 5330);
     			if (img7.src !== (img7_src_value = "../img/dioses romanos_btn/Hades_btn.webp")) attr_dev(img7, "src", img7_src_value);
     			attr_dev(img7, "alt", "");
     			attr_dev(img7, "class", "svelte-gd3wyx");
-    			add_location(img7, file$j, 265, 4, 5665);
+    			add_location(img7, file$j, 265, 4, 5698);
     			attr_dev(button7, "href", "javascript:void(0)");
     			attr_dev(button7, "id", "Hades_boton");
     			attr_dev(button7, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button7, file$j, 264, 2, 5552);
+    			add_location(button7, file$j, 264, 2, 5585);
     			attr_dev(div7, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div7, file$j, 263, 1, 5525);
+    			add_location(div7, file$j, 263, 1, 5558);
     			if (img8.src !== (img8_src_value = "../img/dioses romanos_btn/Minerva_btn.webp")) attr_dev(img8, "src", img8_src_value);
     			attr_dev(img8, "alt", "");
     			attr_dev(img8, "class", "svelte-gd3wyx");
-    			add_location(img8, file$j, 270, 4, 5888);
+    			add_location(img8, file$j, 270, 4, 5921);
     			attr_dev(button8, "href", "javascript:void(0)");
     			attr_dev(button8, "id", "Minerva_boton");
     			attr_dev(button8, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button8, file$j, 269, 2, 5771);
+    			add_location(button8, file$j, 269, 2, 5804);
     			attr_dev(div8, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div8, file$j, 268, 1, 5744);
+    			add_location(div8, file$j, 268, 1, 5777);
     			if (img9.src !== (img9_src_value = "../img/dioses romanos_btn/Diana_btn.webp")) attr_dev(img9, "src", img9_src_value);
     			attr_dev(img9, "alt", "");
     			attr_dev(img9, "class", "svelte-gd3wyx");
-    			add_location(img9, file$j, 275, 4, 6109);
+    			add_location(img9, file$j, 275, 4, 6142);
     			attr_dev(button9, "href", "javascript:void(0)");
     			attr_dev(button9, "id", "Diana_boton");
     			attr_dev(button9, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button9, file$j, 274, 2, 5996);
+    			add_location(button9, file$j, 274, 2, 6029);
     			attr_dev(div9, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div9, file$j, 273, 1, 5969);
+    			add_location(div9, file$j, 273, 1, 6002);
     			if (img10.src !== (img10_src_value = "../img/dioses romanos_btn/Baco_btn.webp")) attr_dev(img10, "src", img10_src_value);
     			attr_dev(img10, "alt", "");
     			attr_dev(img10, "class", "svelte-gd3wyx");
-    			add_location(img10, file$j, 280, 4, 6326);
+    			add_location(img10, file$j, 280, 4, 6359);
     			attr_dev(button10, "href", "javascript:void(0)");
     			attr_dev(button10, "id", "Baco_boton");
     			attr_dev(button10, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button10, file$j, 279, 2, 6215);
+    			add_location(button10, file$j, 279, 2, 6248);
     			attr_dev(div10, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div10, file$j, 278, 1, 6188);
+    			add_location(div10, file$j, 278, 1, 6221);
     			if (img11.src !== (img11_src_value = "../img/dioses romanos_btn/Neptuno_btn.webp")) attr_dev(img11, "src", img11_src_value);
     			attr_dev(img11, "alt", "");
     			attr_dev(img11, "class", "svelte-gd3wyx");
-    			add_location(img11, file$j, 285, 4, 6548);
+    			add_location(img11, file$j, 285, 4, 6581);
     			attr_dev(button11, "href", "javascript:void(0)");
     			attr_dev(button11, "id", "Neptuno_boton");
     			attr_dev(button11, "class", "btn-dios transparent svelte-gd3wyx");
-    			add_location(button11, file$j, 284, 2, 6431);
+    			add_location(button11, file$j, 284, 2, 6464);
     			attr_dev(div11, "class", "btn_dioses svelte-gd3wyx");
-    			add_location(div11, file$j, 283, 1, 6404);
+    			add_location(div11, file$j, 283, 1, 6437);
     			attr_dev(nav, "class", "botones_dioses svelte-gd3wyx");
     			add_location(nav, file$j, 228, 0, 3944);
     			attr_dev(div12, "class", "container");
-    			add_location(div12, file$j, 292, 1, 6663);
+    			add_location(div12, file$j, 292, 1, 6696);
     			attr_dev(section, "class", "dioses svelte-gd3wyx");
-    			add_location(section, file$j, 291, 0, 6637);
+    			add_location(section, file$j, 291, 0, 6670);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -9496,11 +9497,19 @@ var app = (function () {
     		i: function intro(local) {
     			if (current) return;
     			transition_in(header.$$.fragment, local);
+
+    			add_render_callback(() => {
+    				if (!nav_transition) nav_transition = create_bidirectional_transition(nav, blur, { amount: 10 }, true);
+    				nav_transition.run(1);
+    			});
+
     			transition_in(if_block);
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(header.$$.fragment, local);
+    			if (!nav_transition) nav_transition = create_bidirectional_transition(nav, blur, { amount: 10 }, false);
+    			nav_transition.run(0);
     			transition_out(if_block);
     			current = false;
     		},
@@ -9508,6 +9517,7 @@ var app = (function () {
     			destroy_component(header, detaching);
     			if (detaching) detach_dev(t0);
     			if (detaching) detach_dev(nav);
+    			if (detaching && nav_transition) nav_transition.end();
     			if (detaching) detach_dev(t12);
     			if (detaching) detach_dev(section);
     			if_blocks[current_block_type_index].d();
@@ -10589,8 +10599,9 @@ var app = (function () {
     	let t4;
     	let t5;
     	let div1;
-    	let i;
-    	let t7;
+    	let img;
+    	let img_src_value;
+    	let t6;
     	let div3_transition;
     	let current;
 
@@ -10609,25 +10620,26 @@ var app = (function () {
     			t4 = text(t4_value);
     			t5 = space();
     			div1 = element("div");
-    			i = element("i");
-    			i.textContent = "chevron_right";
-    			t7 = space();
-    			attr_dev(span, "class", "card-title activator white-text svelte-27uimn");
-    			add_location(span, file$m, 215, 36, 9176);
-    			attr_dev(p0, "class", "etiquetas svelte-27uimn");
-    			add_location(p0, file$m, 216, 34, 9281);
-    			attr_dev(p1, "class", "descripcion svelte-27uimn");
-    			add_location(p1, file$m, 217, 34, 9360);
+    			img = element("img");
+    			t6 = space();
+    			attr_dev(span, "class", "card-title activator white-text svelte-3xtwil");
+    			add_location(span, file$m, 215, 36, 9323);
+    			attr_dev(p0, "class", "etiquetas svelte-3xtwil");
+    			add_location(p0, file$m, 216, 34, 9428);
+    			attr_dev(p1, "class", "descripcion svelte-3xtwil");
+    			add_location(p1, file$m, 217, 34, 9507);
     			attr_dev(div0, "class", "card-content col s10");
-    			add_location(div0, file$m, 214, 32, 9105);
-    			attr_dev(i, "class", "material-icons center svelte-27uimn");
-    			add_location(i, file$m, 220, 36, 9545);
-    			attr_dev(div1, "class", "col s2 flecha svelte-27uimn");
-    			add_location(div1, file$m, 219, 32, 9481);
-    			attr_dev(div2, "class", "card col s12 svelte-27uimn");
-    			add_location(div2, file$m, 213, 28, 9046);
+    			add_location(div0, file$m, 214, 32, 9252);
+    			if (img.src !== (img_src_value = "img/flecha.png")) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "");
+    			attr_dev(img, "class", "svelte-3xtwil");
+    			add_location(img, file$m, 220, 36, 9692);
+    			attr_dev(div1, "class", "col s2 flecha svelte-3xtwil");
+    			add_location(div1, file$m, 219, 32, 9628);
+    			attr_dev(div2, "class", "card col s12 svelte-3xtwil");
+    			add_location(div2, file$m, 213, 28, 9193);
     			attr_dev(div3, "class", "col s12");
-    			add_location(div3, file$m, 212, 24, 8948);
+    			add_location(div3, file$m, 212, 24, 9095);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div3, anchor);
@@ -10643,8 +10655,8 @@ var app = (function () {
     			append_dev(p1, t4);
     			append_dev(div2, t5);
     			append_dev(div2, div1);
-    			append_dev(div1, i);
-    			append_dev(div3, t7);
+    			append_dev(div1, img);
+    			append_dev(div3, t6);
     			current = true;
     		},
     		p: function update(ctx, dirty) {
@@ -10724,6 +10736,7 @@ var app = (function () {
     	let t12;
     	let div9;
     	let div8;
+    	let div11_transition;
     	let current;
     	let mounted;
     	let dispose;
@@ -10774,72 +10787,72 @@ var app = (function () {
     			div9 = element("div");
     			div8 = element("div");
     			if (if_block) if_block.c();
-    			attr_dev(h4, "class", "banner_tit svelte-27uimn");
-    			add_location(h4, file$m, 164, 20, 6036);
-    			attr_dev(p, "class", "banner_txt svelte-27uimn");
-    			add_location(p, file$m, 165, 20, 6105);
-    			attr_dev(div0, "class", "bannerBuscar svelte-27uimn");
-    			add_location(div0, file$m, 163, 16, 5989);
+    			attr_dev(h4, "class", "banner_tit svelte-3xtwil");
+    			add_location(h4, file$m, 164, 20, 6183);
+    			attr_dev(p, "class", "banner_txt svelte-3xtwil");
+    			add_location(p, file$m, 165, 20, 6252);
+    			attr_dev(div0, "class", "bannerBuscar svelte-3xtwil");
+    			add_location(div0, file$m, 163, 16, 6136);
     			attr_dev(div1, "class", "container");
-    			add_location(div1, file$m, 162, 12, 5949);
+    			add_location(div1, file$m, 162, 12, 6096);
     			attr_dev(div2, "class", "usuario");
-    			add_location(div2, file$m, 161, 8, 5915);
+    			add_location(div2, file$m, 161, 8, 6062);
     			attr_dev(img0, "class", "center-align");
     			attr_dev(img0, "width", "90%");
     			if (img0.src !== (img0_src_value = "img/filtros/todos.svg")) attr_dev(img0, "src", img0_src_value);
-    			add_location(img0, file$m, 172, 110, 6470);
-    			attr_dev(span0, "class", "svelte-27uimn");
-    			add_location(span0, file$m, 173, 89, 6564);
-    			attr_dev(button0, "class", "btn_filtro svelte-27uimn");
+    			add_location(img0, file$m, 172, 110, 6617);
+    			attr_dev(span0, "class", "svelte-3xtwil");
+    			add_location(span0, file$m, 173, 89, 6711);
+    			attr_dev(button0, "class", "btn_filtro svelte-3xtwil");
     			toggle_class(button0, "selected", /*current*/ ctx[0] === "TODOS");
-    			add_location(button0, file$m, 172, 20, 6380);
+    			add_location(button0, file$m, 172, 20, 6527);
     			attr_dev(div3, "class", "col s3 todos");
-    			add_location(div3, file$m, 171, 16, 6333);
+    			add_location(div3, file$m, 171, 16, 6480);
     			attr_dev(img1, "class", "center-align");
     			attr_dev(img1, "width", "90%");
     			if (img1.src !== (img1_src_value = "img/filtros/mitos.svg")) attr_dev(img1, "src", img1_src_value);
-    			add_location(img1, file$m, 176, 110, 6767);
-    			attr_dev(span1, "class", "svelte-27uimn");
-    			add_location(span1, file$m, 177, 89, 6861);
-    			attr_dev(button1, "class", "btn_filtro svelte-27uimn");
+    			add_location(img1, file$m, 176, 110, 6914);
+    			attr_dev(span1, "class", "svelte-3xtwil");
+    			add_location(span1, file$m, 177, 89, 7008);
+    			attr_dev(button1, "class", "btn_filtro svelte-3xtwil");
     			toggle_class(button1, "selected", /*current*/ ctx[0] === "MITOS");
-    			add_location(button1, file$m, 176, 20, 6677);
+    			add_location(button1, file$m, 176, 20, 6824);
     			attr_dev(div4, "class", "col s3 arte");
-    			add_location(div4, file$m, 175, 16, 6631);
+    			add_location(div4, file$m, 175, 16, 6778);
     			attr_dev(img2, "class", "center-align");
     			attr_dev(img2, "width", "90%");
     			if (img2.src !== (img2_src_value = "img/filtros/heroes.svg")) attr_dev(img2, "src", img2_src_value);
-    			add_location(img2, file$m, 180, 112, 7069);
-    			attr_dev(span2, "class", "svelte-27uimn");
-    			add_location(span2, file$m, 181, 90, 7164);
-    			attr_dev(button2, "class", "btn_filtro svelte-27uimn");
+    			add_location(img2, file$m, 180, 112, 7216);
+    			attr_dev(span2, "class", "svelte-3xtwil");
+    			add_location(span2, file$m, 181, 90, 7311);
+    			attr_dev(button2, "class", "btn_filtro svelte-3xtwil");
     			toggle_class(button2, "selected", /*current*/ ctx[0] === "HEROES");
-    			add_location(button2, file$m, 180, 20, 6977);
+    			add_location(button2, file$m, 180, 20, 7124);
     			attr_dev(div5, "class", "col s3 cidades");
-    			add_location(div5, file$m, 179, 16, 6928);
+    			add_location(div5, file$m, 179, 16, 7075);
     			attr_dev(img3, "class", "center-align");
     			attr_dev(img3, "width", "90%");
     			if (img3.src !== (img3_src_value = "img/filtros/seres.svg")) attr_dev(img3, "src", img3_src_value);
-    			add_location(img3, file$m, 184, 110, 7363);
-    			attr_dev(span3, "class", "svelte-27uimn");
-    			add_location(span3, file$m, 185, 89, 7457);
-    			attr_dev(button3, "class", "btn_filtro svelte-27uimn");
+    			add_location(img3, file$m, 184, 110, 7510);
+    			attr_dev(span3, "class", "svelte-3xtwil");
+    			add_location(span3, file$m, 185, 89, 7604);
+    			attr_dev(button3, "class", "btn_filtro svelte-3xtwil");
     			toggle_class(button3, "selected", /*current*/ ctx[0] === "SERES");
-    			add_location(button3, file$m, 184, 20, 7273);
+    			add_location(button3, file$m, 184, 20, 7420);
     			attr_dev(div6, "class", "col s3");
-    			add_location(div6, file$m, 183, 16, 7232);
+    			add_location(div6, file$m, 183, 16, 7379);
     			attr_dev(div7, "id", "BtnContainer");
-    			attr_dev(div7, "class", "col s12 svelte-27uimn");
-    			add_location(div7, file$m, 170, 12, 6277);
+    			attr_dev(div7, "class", "col s12 svelte-3xtwil");
+    			add_location(div7, file$m, 170, 12, 6424);
     			attr_dev(div8, "class", "row");
-    			add_location(div8, file$m, 189, 16, 7578);
-    			attr_dev(div9, "class", "tarjetas svelte-27uimn");
-    			add_location(div9, file$m, 188, 12, 7539);
+    			add_location(div8, file$m, 189, 16, 7725);
+    			attr_dev(div9, "class", "tarjetas svelte-3xtwil");
+    			add_location(div9, file$m, 188, 12, 7686);
     			attr_dev(div10, "class", "container");
-    			add_location(div10, file$m, 169, 8, 6241);
-    			attr_dev(div11, "class", "corpo center svelte-27uimn");
-    			add_location(div11, file$m, 160, 4, 5880);
-    			add_location(div12, file$m, 156, 0, 5853);
+    			add_location(div10, file$m, 169, 8, 6388);
+    			attr_dev(div11, "class", "corpo center svelte-3xtwil");
+    			add_location(div11, file$m, 160, 4, 5979);
+    			add_location(div12, file$m, 156, 0, 5952);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -10917,17 +10930,26 @@ var app = (function () {
     			if (current) return;
     			transition_in(header.$$.fragment, local);
     			transition_in(if_block);
+
+    			add_render_callback(() => {
+    				if (!div11_transition) div11_transition = create_bidirectional_transition(div11, fade, { delay: 250, duration: 300 }, true);
+    				div11_transition.run(1);
+    			});
+
     			current = true;
     		},
     		o: function outro(local) {
     			transition_out(header.$$.fragment, local);
     			transition_out(if_block);
+    			if (!div11_transition) div11_transition = create_bidirectional_transition(div11, fade, { delay: 250, duration: 300 }, false);
+    			div11_transition.run(0);
     			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div12);
     			destroy_component(header);
     			if (if_block) if_block.d();
+    			if (detaching && div11_transition) div11_transition.end();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -11009,7 +11031,7 @@ var app = (function () {
     			nombre: "Hércules",
     			imagen: "Tarjeta_Heroes_Hercules",
     			etiqueta: "heroes",
-    			descripcion: "Es el más célebre de los héroes grecolatinos y la fuerza es su atributo característico."
+    			descripcion: "Es el más célebre de los héroes grecolatinos y la fuerza es su atributo característico. Recorrió en solitario numerosos lugares, para liberar el mundo de monstruos, delitos y asesinatos."
     		},
     		{
     			nombre: "Jasón",
