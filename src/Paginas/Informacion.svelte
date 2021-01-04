@@ -1,40 +1,25 @@
 <script>
-    import Footer from "../Componentes/Footer.svelte";
     import {
         link
     } from 'svelte-spa-router'
 </script>
-<div class="fondo">
+<div>
     <!-- navbar -->
     <div class="navbar">
         <div class="container">
             <div class="row">
                 <div class="col s12">
                     <div class="col s6 content-left">
-                        <a href="/" use:link class="left"><img src="img/prev.png" alt="" width="50%"
-                                class="prev"></a>
+                        <a style="margin-top:10px;" href="/ajustes" use:link class="left"><i class="material-icons black-text">chevron_left</i></a>
                     </div>
                     <div class="col s6 content-right">
-                        <p class="white-text axustes">INFORMACIÓN</p>
+                        <p class="black-text">INFORMACIÓN</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <!-- end navbar -->
-    <div class="shape" data-negative="false">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" preserveAspectRatio="none" class="shape-fill">
-            <path class="elementor-shape-fill" opacity="0.33"
-                d="M473,67.3c-203.9,88.3-263.1-34-320.3,0C66,119.1,0,59.7,0,59.7V0h1000v59.7 c0,0-62.1,26.1-94.9,29.3c-32.8,3.3-62.8-12.3-75.8-22.1C806,49.6,745.3,8.7,694.9,4.7S492.4,59,473,67.3z">
-            </path>
-            <path class="elementor-shape-fill" opacity="0.66"
-                d="M734,67.3c-45.5,0-77.2-23.2-129.1-39.1c-28.6-8.7-150.3-10.1-254,39.1 s-91.7-34.4-149.2,0C115.7,118.3,0,39.8,0,39.8V0h1000v36.5c0,0-28.2-18.5-92.1-18.5C810.2,18.1,775.7,67.3,734,67.3z">
-            </path>
-            <path class="elementor-shape-fill"
-                d="M766.1,28.9c-200-57.5-266,65.5-395.1,19.5C242,1.8,242,5.4,184.8,20.6C128,35.8,132.3,44.9,89.9,52.5C28.6,63.7,0,0,0,0 h1000c0,0-9.9,40.9-83.6,48.1S829.6,47,766.1,28.9z">
-            </path>
-        </svg>
-    </div>
 
     <div class="container">
 
@@ -48,7 +33,7 @@
             <div class="row">
                 <div class="col s12 center-align">
                     <h4 class="about-tit">Dioses de Roma</h4>
-                    <p class="about-version">Versión 4.0.0.</p>
+                    <p class="about-version">Versión 9.0.0.</p>
                     <p class="about-txt">La app para aprender los dioses de la mitología clásica.</p>
 
                     <p class="about-txt">
@@ -79,7 +64,7 @@
 
                     <p class="about-textoDos"><strong class="white-text">Actualizacións nas que estamos
                             a traballar</strong></p>
-                    <ul class="white-text left-align">
+                    <ul class="white-text left-align listado">
                         <li> 1- Añadir más dioses</li>
                         <li> 2- Añadir buscador</li>
                         <li> 3- Mejoras generales en el diseño</li>
@@ -117,16 +102,24 @@
     </section>
 
 </div>
-<Footer />
 
 <style>
-    .fondo {
-        background-color: #333;
-        margin: 0px;
-        padding: 0px;
-        height: 100%;
-        width: 100vw;
+
+    /* Páginas de enlace */
+
+    .collection{
+        background-color: #dfd7c3;
+        margin-top: 40px;
     }
+
+ .enlaces{
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: black;
+    text-align: left;
+    background-color: #dfd7c3;
+ }
+
+ /* logo */
 
     .logo_RT {
         padding-top: 20px;
@@ -152,7 +145,7 @@
 
     .navbar {
         padding: 15px 0 11px;
-        background-color: #212121;
+        background-color: #dfd7c3;
         position: fixed;
         width: 100%;
         top: 0;
@@ -188,13 +181,6 @@
         margin-bottom: 0;
     }
 
-    .navbar .content-left .sidebar {
-        margin-right: 18px;
-    }
-
-    .navbar .content-right .sidebar-search {
-        margin-right: 14px;
-    }
 
     .navbar .content-right .sidebar-cart i,
     .navbar .content-right .sidebar-search i {
@@ -202,45 +188,17 @@
         left: 8px;
     }
 
-    .axustes {
-        text-align: right;
-    }
-
-    .prev {
-        padding-top: 5px;
-    }
-
     /* Benvida */
 
-
-
-    .caja_benvida {
-        padding: 0px;
-    }
-
-    .benvida {
-        padding-top: 10px;
-        padding-bottom: 0px;
-        padding-left: 0px;
-    }
 
     .banner img {
         display: block;
         margin: 0px auto;
         padding-bottom: 0px;
-        padding-top: 50px;
+        padding-top: 100px;
         width: 30%;
     }
 
-    .saudo {
-        font-size: 36px;
-        color: white;
-        font-weight: 600;
-        padding-bottom: 0px;
-        margin-bottom: 0px;
-        margin-top: 0px;
-
-    }
 
     /* Sobre esta aplicación */
 
@@ -254,7 +212,7 @@
 
     .about-version {
         color: white;
-        font-family: Roboto;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         font-size: 12px;
         font-weight: 300;
         text-align: center;
@@ -262,7 +220,7 @@
 
     .about-txt {
         color: white;
-        font-family: Roboto;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         font-size: 14px;
         font-weight: 300;
         text-align: center;
@@ -270,8 +228,13 @@
     }
 
     .about-textoDos {
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
         padding-top: 40px;
         margin-top: 40px;
+    }
+
+    .listado{
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     }
 
     /* Licencia */

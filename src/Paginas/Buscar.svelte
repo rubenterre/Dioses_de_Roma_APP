@@ -71,7 +71,7 @@
             nombre: 'Hércules',
             imagen: 'Tarjeta_Heroes_Hercules',
             etiqueta: 'heroes',
-            descripcion: 'Es el más célebre de los héroes grecolatinos y la fuerza es su atributo característico. Recorrió en solitario numerosos lugares, para liberar el mundo de monstruos, delitos y asesinatos.'
+            descripcion: 'Es el más célebre de los héroes grecolatinos y la fuerza es su atributo característico. Recorrió en solitario numerosos lugares, para liberar el mundo de monstruos y fechorías.'
         },
         {
             nombre: 'Jasón',
